@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 灵小犀</title>
+  <meta name="description" content="学习困难儿童辅助平台登录">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <style>
+    /* 基础重置 */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-normal);
+      color: var(--color-text-primary);
+      background-color: var(--color-background);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl);
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    a {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    a:hover,
+    a:focus {
+      color: var(--color-primary);
+    }
+
+    /* 登录卡片 */
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background-color: var(--color-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-3xl) var(--space-2xl);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 顶部装饰条：小面积蓝色 */
+    .login-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background-color: var(--color-primary);
+    }
+
+    /* 登录头部 */
+    .login-header {
+      text-align: center;
+      margin-bottom: var(--space-2xl);
+    }
+
+    .login-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto var(--space-lg);
+      background-color: var(--color-primary-light);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-logo svg {
+      width: 32px;
+      height: 32px;
+      color: var(--color-primary);
+    }
+
+    /* Logo 占位区域，客户可将此处替换为真实 logo 图片 */
+    .login-logo.is-placeholder {
+      color: var(--color-primary);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.05em;
+    }
+
+    .login-title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-semibold);
+      line-height: var(--line-height-tight);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-sm);
+    }
+
+    .login-subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    /* 表单 */
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .form-label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-primary);
+    }
+
+    .form-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 var(--space-base);
+      font-family: inherit;
+      font-size: var(--font-size-base);
+      color: var(--color-text-primary);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .form-input::placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    .form-input:hover {
+      border-color: var(--color-text-tertiary);
+    }
+
+    .form-input:focus {
+      border-color: var(--color-border-focus);
+      box-shadow: 0 0 0 3px var(--color-primary-light);
+    }
+
+    .form-input.is-invalid {
+      border-color: var(--color-error);
+      background-color: var(--color-error-light);
+    }
+
+    .form-error {
+      display: none;
+      font-size: var(--font-size-xs);
+      color: var(--color-error);
+    }
+
+    .form-input.is-invalid + .form-error {
+      display: block;
+    }
+
+    /* 表单选项 */
+    .form-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: var(--font-size-sm);
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .remember-me input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      color: var(--color-primary);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .forgot-link:hover,
+    .forgot-link:focus {
+      color: var(--color-primary-hover);
+    }
+
+    /* 登录按钮 */
+    .login-button {
+      width: 100%;
+      height: 48px;
+      margin-top: var(--space-sm);
+      font-family: inherit;
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-on-primary);
+      background-color: var(--color-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background-color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .login-button:hover {
+      background-color: var(--color-primary-hover);
+    }
+
+    .login-button:active {
+      transform: scale(0.98);
+    }
+
+    /* 注册提示 */
+    .register-hint {
+      text-align: center;
+      margin-top: var(--space-xl);
+      padding-top: var(--space-xl);
+      border-top: 1px solid var(--color-divider);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .register-hint a {
+      color: var(--color-primary);
+      font-weight: var(--font-weight-medium);
+      margin-left: var(--space-xs);
+    }
+
+    /* 底部装饰 */
+    .login-footer {
+      margin-top: var(--space-2xl);
+      text-align: center;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+    }
+
+    /* 响应式微调 */
+    @media (max-width: 480px) {
+      .login-card {
+        padding: var(--space-2xl) var(--space-lg);
+        border-radius: var(--radius-lg);
+      }
+
+      .login-title {
+        font-size: var(--font-size-xl);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <main class="login-card" role="main">
+      <div class="login-header">
+      <!-- 客户可将下方占位区域替换为真实 logo 图片，例如：<img src="../assets/images/logo.png" alt="灵小犀 Logo"> -->
+      <div class="login-logo is-placeholder" aria-label="灵小犀 Logo 占位">
+        LOGO
+      </div>
+      <h1 class="login-title">欢迎回到灵小犀</h1>
+      <p class="login-subtitle">用心陪伴，帮助每一位孩子快乐成长</p>
+    </div>
+
+    <form class="login-form" id="loginForm" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="phone">手机号码</label>
+        <input
+          class="form-input"
+          id="phone"
+          name="phone"
+          type="tel"
+          placeholder="请输入手机号码"
+          autocomplete="tel"
+          maxlength="11"
+          required
+        >
+        <span class="form-error" id="phoneError">请输入正确的 11 位手机号码</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">登录密码</label>
+        <input
+          class="form-input"
+          id="password"
+          name="password"
+          type="password"
+          placeholder="请输入登录密码"
+          autocomplete="current-password"
+          minlength="6"
+          required
+        >
+        <span class="form-error" id="passwordError">密码长度不能少于 6 位</span>
+      </div>
+
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" name="remember" id="remember">
+          <span>记住我</span>
+        </label>
+        <a class="forgot-link" href="#">找回密码？</a>
+      </div>
+
+      <button class="login-button" type="submit">登 录</button>
+    </form>
+
+    <p class="register-hint">
+      还没有账号？<a href="#">立即注册</a>
+    </p>
+
+    <footer class="login-footer">
+      登录即代表您同意《用户协议》与《隐私政策》
+    </footer>
+  </main>
+  </div>
+
+  <script>
+    (function () {
+      const form = document.getElementById('loginForm');
+      const phoneInput = document.getElementById('phone');
+      const passwordInput = document.getElementById('password');
+
+      function validatePhone(value) {
+        return /^1[3-9]\d{9}$/.test(value);
+      }
+
+      function setInvalid(input, isInvalid) {
+        input.classList.toggle('is-invalid', isInvalid);
+      }
+
+      phoneInput.addEventListener('input', function () {
+        setInvalid(phoneInput, false);
+      });
+
+      passwordInput.addEventListener('input', function () {
+        setInvalid(passwordInput, false);
+      });
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const phone = phoneInput.value.trim();
+        const password = passwordInput.value.trim();
+        let hasError = false;
+
+        if (!validatePhone(phone)) {
+          setInvalid(phoneInput, true);
+          hasError = true;
+        }
+
+        if (password.length < 6) {
+          setInvalid(passwordInput, true);
+          hasError = true;
+        }
+
+        if (!hasError) {
+          // 演示项目：仅在前端提示登录成功
+          alert('登录信息校验通过（演示项目，未连接后端）');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

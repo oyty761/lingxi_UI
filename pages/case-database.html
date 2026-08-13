@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个案数据库 - 灵小犀</title>
+  <meta name="description" content="管理个案档案与干预小组">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    /* 页面专属紧凑样式 */
+
+    /* 干预小组列表 */
+    .group-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .group-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-base);
+      padding: var(--space-sm) var(--space-base);
+      background-color: var(--color-background);
+      border-radius: var(--radius-md);
+      transition: background-color var(--transition-fast);
+    }
+
+    .group-item:hover {
+      background-color: var(--color-primary-light);
+    }
+
+    .group-item__info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .group-item__name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-primary);
+    }
+
+    .group-item__meta {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+    }
+
+    /* 快捷入口 */
+    .quick-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .quick-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-base);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      border-radius: var(--radius-md);
+      transition: background-color var(--transition-fast), color var(--transition-fast);
+    }
+
+    .quick-item:hover {
+      color: var(--color-primary);
+      background-color: var(--color-primary-light);
+    }
+
+    .quick-item__icon {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      flex-shrink: 0;
+    }
+
+    /* 表格 */
+    .case-table-wrapper {
+      overflow: auto;
+    }
+
+    .case-table {
+      min-width: 680px;
+    }
+
+    .case-table th:first-child,
+    .case-table td:first-child {
+      padding-left: var(--space-lg);
+    }
+
+    .case-table th:last-child,
+    .case-table td:last-child {
+      padding-right: var(--space-lg);
+    }
+
+    .case-table tbody tr {
+      transition: background-color var(--transition-fast);
+    }
+
+    .case-table tbody tr:hover {
+      background-color: var(--color-primary-light);
+    }
+
+    .case-name {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .case-name__text {
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-primary);
+    }
+
+    /* 右侧辅助栏 */
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      min-height: 0;
+    }
+
+    .right-panel .card {
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* 表格操作按钮更紧凑 */
+    .table__actions .btn--icon {
+      width: 28px;
+      height: 28px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- 顶部导航栏 -->
+    <nav class="topnav" role="navigation" aria-label="主导航">
+      <div class="topnav__brand">
+        <div class="topnav__logo">LOGO</div>
+        <span class="topnav__name">灵小犀</span>
+      </div>
+      <div class="topnav__nav">
+        <a class="topnav__link" href="#">
+          <svg class="topnav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          工作台
+        </a>
+        <a class="topnav__link is-active" href="case-database.html" aria-current="page">
+          <svg class="topnav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          个案数据库
+        </a>
+        <a class="topnav__link" href="#">
+          <svg class="topnav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          课程中心
+        </a>
+      </div>
+      <div class="topnav__user">
+        <div class="avatar">U</div>
+        <span>管理员</span>
+      </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main">
+      <header class="main__header">
+        <div>
+          <h1 class="main__title">个案数据库</h1>
+          <p class="main__subtitle">管理个案档案与干预小组</p>
+        </div>
+        <div class="main__actions">
+          <button class="btn btn--primary-outline btn--sm" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            新建小组
+          </button>
+          <button class="btn btn--primary btn--sm" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            新增个案
+          </button>
+        </div>
+      </header>
+
+      <div class="main__body">
+        <!-- 统计概览 -->
+        <section class="stat-grid" aria-label="数据概览">
+          <article class="stat-card stat-card--primary">
+            <span class="stat-card__label">个案总数</span>
+            <strong class="stat-card__value">2</strong>
+            <span class="stat-card__trend">本月新增 0 人</span>
+          </article>
+          <article class="stat-card stat-card--secondary">
+            <span class="stat-card__label">干预小组</span>
+            <strong class="stat-card__value">1</strong>
+            <span class="stat-card__trend">共 0 名成员</span>
+          </article>
+          <article class="stat-card stat-card--accent">
+            <span class="stat-card__label">最近更新</span>
+            <strong class="stat-card__value">2</strong>
+            <span class="stat-card__trend">本周更新记录</span>
+          </article>
+        </section>
+
+        <!-- 主体内容：左侧表格 + 右侧辅助信息 -->
+        <div class="content-grid">
+          <!-- 左侧：个案列表 -->
+          <section class="card table-card" aria-labelledby="case-title">
+            <div class="card__header">
+              <h2 class="card__title" id="case-title">个案基本情况</h2>
+              <span class="text-muted">共 2 条记录</span>
+            </div>
+            <div class="toolbar">
+              <div class="toolbar__filters">
+                <div class="toolbar__search">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  <input class="input" type="search" placeholder="搜索姓名">
+                </div>
+                <select class="toolbar__select" aria-label="性别筛选">
+                  <option value="">全部性别</option>
+                  <option value="male">男</option>
+                  <option value="female">女</option>
+                </select>
+                <select class="toolbar__select" aria-label="上课形式筛选">
+                  <option value="">全部形式</option>
+                  <option value="one-on-one">1 对 1</option>
+                  <option value="group">小组课</option>
+                </select>
+              </div>
+            </div>
+            <div class="card__body case-table-wrapper">
+            <table class="table case-table">
+              <thead>
+                <tr>
+                  <th>姓名</th>
+                  <th>性别</th>
+                  <th>出生年月</th>
+                  <th>年龄</th>
+                  <th>上课形式</th>
+                  <th>备注</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="case-name">
+                      <div class="avatar" aria-hidden="true">2</div>
+                      <span class="case-name__text">2b</span>
+                    </div>
+                  </td>
+                  <td>男</td>
+                  <td class="text-muted">—</td>
+                  <td class="text-muted">—</td>
+                  <td><span class="tag tag--primary">1 对 1</span></td>
+                  <td class="text-muted">—</td>
+                  <td>
+                    <div class="table__actions">
+                      <a class="table__action" href="case-detail.html">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+                          <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+                        </svg>
+                        数据平台
+                      </a>
+                      <a class="table__action" href="#">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                        上课
+                      </a>
+                      <button class="btn btn--icon" type="button" aria-label="编辑">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button class="btn btn--icon is-danger" type="button" aria-label="删除">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="case-name">
+                      <div class="avatar" aria-hidden="true">3</div>
+                      <span class="case-name__text">3 的</span>
+                    </div>
+                  </td>
+                  <td>男</td>
+                  <td class="text-muted">—</td>
+                  <td class="text-muted">—</td>
+                  <td><span class="tag tag--primary">1 对 1</span></td>
+                  <td class="text-muted">—</td>
+                  <td>
+                    <div class="table__actions">
+                      <a class="table__action" href="case-detail.html">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+                          <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+                        </svg>
+                        数据平台
+                      </a>
+                      <a class="table__action" href="#">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                        上课
+                      </a>
+                      <button class="btn btn--icon" type="button" aria-label="编辑">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button class="btn btn--icon is-danger" type="button" aria-label="删除">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 右侧：辅助信息 -->
+        <aside class="right-panel">
+          <section class="card" aria-labelledby="group-title">
+            <div class="card__header">
+              <h2 class="card__title" id="group-title">干预小组</h2>
+            </div>
+            <div class="card__body">
+              <div class="group-list">
+                <article class="group-item">
+                  <div class="group-item__info">
+                    <span class="group-item__name">group1</span>
+                    <span class="group-item__meta">0 名成员</span>
+                  </div>
+                  <div class="table__actions">
+                    <button class="btn btn--icon" type="button" aria-label="编辑小组">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button class="btn btn--icon is-danger" type="button" aria-label="删除小组">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section class="card" aria-labelledby="quick-title">
+            <div class="card__header">
+              <h2 class="card__title" id="quick-title">快捷入口</h2>
+            </div>
+            <div class="card__body">
+              <nav class="quick-list" aria-label="快捷操作">
+                <a class="quick-item" href="#">
+                  <span class="quick-item__icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                  </span>
+                  批量导入个案
+                </a>
+                <a class="quick-item" href="#">
+                  <span class="quick-item__icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </span>
+                  导出个案档案
+                </a>
+              </nav>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
