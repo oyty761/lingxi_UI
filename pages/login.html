@@ -213,6 +213,132 @@
       color: var(--color-primary-hover);
     }
 
+    /* 弹窗 */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+      background-color: rgba(44, 62, 80, 0.45);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+
+    .modal.is-open {
+      display: flex;
+    }
+
+    .modal.is-visible {
+      opacity: 1;
+    }
+
+    .modal__container {
+      width: 100%;
+      max-width: 420px;
+      max-height: calc(100vh - var(--space-2xl));
+      display: flex;
+      flex-direction: column;
+      background-color: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      transform: translateY(8px);
+      transition: transform var(--transition-base);
+    }
+
+    .modal.is-visible .modal__container {
+      transform: translateY(0);
+    }
+
+    .modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-base);
+      padding: var(--space-base) var(--space-lg);
+      border-bottom: 1px solid var(--color-divider);
+    }
+
+    .modal__title {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+
+    .modal__close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-tertiary);
+      background-color: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xl);
+      line-height: 1;
+      cursor: pointer;
+      transition: color var(--transition-fast), background-color var(--transition-fast);
+    }
+
+    .modal__close:hover {
+      color: var(--color-text-primary);
+      background-color: var(--color-background);
+    }
+
+    .modal__body {
+      padding: var(--space-lg);
+      overflow-y: auto;
+    }
+
+    .modal__footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--space-base);
+      padding: var(--space-base) var(--space-lg);
+      border-top: 1px solid var(--color-divider);
+    }
+
+    .modal__btn {
+      height: 40px;
+      padding: 0 var(--space-lg);
+      font-family: inherit;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background-color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .modal__btn:active {
+      transform: scale(0.98);
+    }
+
+    .modal__btn--primary {
+      color: var(--color-text-on-primary);
+      background-color: var(--color-primary);
+    }
+
+    .modal__btn--primary:hover {
+      background-color: var(--color-primary-hover);
+    }
+
+    .modal__btn--secondary {
+      color: var(--color-text-secondary);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+    }
+
+    .modal__btn--secondary:hover {
+      background-color: var(--color-background);
+    }
+
     /* 登录按钮 */
     .login-button {
       width: 100%;
@@ -322,20 +448,77 @@
           <input type="checkbox" name="remember" id="remember">
           <span>记住我</span>
         </label>
-        <a class="forgot-link" href="#">找回密码？</a>
+        <a class="forgot-link" href="#" id="forgotLink">找回密码？</a>
       </div>
 
       <button class="login-button" type="submit">登 录</button>
     </form>
 
     <p class="register-hint">
-      还没有账号？<a href="#">立即注册</a>
+      还没有账号？<a href="#" id="registerLink">立即注册</a>
     </p>
 
     <footer class="login-footer">
       登录即代表您同意《用户协议》与《隐私政策》
     </footer>
   </main>
+  </div>
+
+  <!-- 找回密码弹窗 -->
+  <div class="modal" id="forgotModal" role="dialog" aria-modal="true" aria-labelledby="forgotTitle">
+    <div class="modal__container">
+      <form id="forgotForm">
+        <div class="modal__header">
+          <h2 class="modal__title" id="forgotTitle">找回密码</h2>
+          <button class="modal__close" type="button" aria-label="关闭" data-close-modal>&times;</button>
+        </div>
+        <div class="modal__body">
+          <p class="login-subtitle" style="margin-bottom: var(--space-lg);">请输入手机号，我们将向该手机号发送验证码以重置密码。</p>
+          <div class="form-group">
+            <label class="form-label" for="forgotPhone">手机号码</label>
+            <input class="form-input" id="forgotPhone" name="phone" type="tel" placeholder="请输入手机号码" maxlength="11" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="forgotCode">验证码</label>
+            <input class="form-input" id="forgotCode" name="code" type="text" placeholder="请输入验证码" maxlength="6" required>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button class="modal__btn modal__btn--secondary" type="button" data-close-modal>取消</button>
+          <button class="modal__btn modal__btn--primary" type="submit">提交</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 注册弹窗 -->
+  <div class="modal" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerTitle">
+    <div class="modal__container">
+      <form id="registerForm">
+        <div class="modal__header">
+          <h2 class="modal__title" id="registerTitle">注册账号</h2>
+          <button class="modal__close" type="button" aria-label="关闭" data-close-modal>&times;</button>
+        </div>
+        <div class="modal__body">
+          <div class="form-group">
+            <label class="form-label" for="registerPhone">手机号码</label>
+            <input class="form-input" id="registerPhone" name="phone" type="tel" placeholder="请输入手机号码" maxlength="11" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="registerPassword">设置密码</label>
+            <input class="form-input" id="registerPassword" name="password" type="password" placeholder="请设置登录密码" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="registerConfirmPassword">确认密码</label>
+            <input class="form-input" id="registerConfirmPassword" name="confirmPassword" type="password" placeholder="请再次输入密码" minlength="6" required>
+          </div>
+        </div>
+        <div class="modal__footer">
+          <button class="modal__btn modal__btn--secondary" type="button" data-close-modal>取消</button>
+          <button class="modal__btn modal__btn--primary" type="submit">注册</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script>
@@ -381,6 +564,98 @@
           // 演示项目：仅在前端提示登录成功
           alert('登录信息校验通过（演示项目，未连接后端）');
         }
+      });
+
+      // 弹窗控制
+      const forgotLink = document.getElementById('forgotLink');
+      const registerLink = document.getElementById('registerLink');
+      const forgotModal = document.getElementById('forgotModal');
+      const registerModal = document.getElementById('registerModal');
+
+      function openModal(modal) {
+        modal.classList.add('is-open');
+        // 强制重排以触发过渡动画
+        void modal.offsetWidth;
+        modal.classList.add('is-visible');
+        const firstInput = modal.querySelector('input');
+        if (firstInput) firstInput.focus();
+      }
+
+      function closeModal(modal) {
+        modal.classList.remove('is-visible');
+        setTimeout(function () {
+          modal.classList.remove('is-open');
+        }, 200);
+      }
+
+      function bindModal(link, modal) {
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          openModal(modal);
+        });
+
+        modal.addEventListener('click', function (event) {
+          if (event.target === modal) {
+            closeModal(modal);
+          }
+        });
+
+        modal.querySelectorAll('[data-close-modal]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            closeModal(modal);
+          });
+        });
+      }
+
+      bindModal(forgotLink, forgotModal);
+      bindModal(registerLink, registerModal);
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          [forgotModal, registerModal].forEach(function (modal) {
+            if (modal.classList.contains('is-open')) {
+              closeModal(modal);
+            }
+          });
+        }
+      });
+
+      // 找回密码表单
+      document.getElementById('forgotForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const phone = document.getElementById('forgotPhone').value.trim();
+        if (!validatePhone(phone)) {
+          alert('请输入正确的 11 位手机号码');
+          return;
+        }
+        alert('验证码已发送（演示项目，未连接后端）');
+        closeModal(forgotModal);
+      });
+
+      // 注册表单
+      document.getElementById('registerForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const phone = document.getElementById('registerPhone').value.trim();
+        const password = document.getElementById('registerPassword').value.trim();
+        const confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
+
+        if (!validatePhone(phone)) {
+          alert('请输入正确的 11 位手机号码');
+          return;
+        }
+
+        if (password.length < 6) {
+          alert('密码长度不能少于 6 位');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          alert('两次输入的密码不一致');
+          return;
+        }
+
+        alert('注册信息校验通过（演示项目，未连接后端）');
+        closeModal(registerModal);
       });
     })();
   </script>

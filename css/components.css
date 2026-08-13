@@ -112,6 +112,28 @@ a:focus {
   background-color: var(--color-primary);
 }
 
+.btn--danger {
+  color: var(--color-text-on-primary);
+  background-color: var(--color-error);
+}
+
+.btn--danger:hover {
+  background-color: var(--color-error-dark);
+}
+
+/* 大按钮，用于重要操作 */
+.btn--large {
+  padding: var(--space-base) var(--space-lg);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-md);
+}
+
+.btn--large .btn__icon {
+  width: 20px;
+  height: 20px;
+}
+
 .btn--icon {
   width: 32px;
   height: 32px;
@@ -172,7 +194,7 @@ a:focus {
 }
 
 .card__title {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
@@ -631,4 +653,269 @@ a:focus {
   .table td {
     padding: var(--space-base);
   }
+}
+
+/* ======================
+   弹窗 / Modal
+   ====================== */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  background-color: rgba(44, 62, 80, 0.45);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.modal.is-open {
+  display: flex;
+}
+
+.modal.is-visible {
+  opacity: 1;
+}
+
+.modal__container {
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - var(--space-2xl));
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  transform: translateY(8px);
+  transition: transform var(--transition-base);
+}
+
+.modal.is-visible .modal__container {
+  transform: translateY(0);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-base);
+  padding: var(--space-base) var(--space-lg);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.modal__title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.modal__close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.modal__close:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+}
+
+.modal__body {
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+
+.modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-base);
+  padding: var(--space-base) var(--space-lg);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* ======================
+   表单布局 / Form Layout
+   ====================== */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-base);
+}
+
+.form-field:last-child {
+  margin-bottom: 0;
+}
+
+.form-field__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.form-field__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.form-field--row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-base);
+}
+
+.form-field--row > .form-field {
+  margin-bottom: 0;
+}
+
+.form-field textarea.input {
+  height: auto;
+  min-height: 80px;
+  padding: var(--space-sm) var(--space-base);
+  resize: vertical;
+}
+
+/* ======================
+   选择列表 / Option List
+   ====================== */
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-height: 200px;
+  overflow-y: auto;
+  padding: var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.option-list__search {
+  position: relative;
+  margin-bottom: var(--space-xs);
+}
+
+.option-list__search svg {
+  position: absolute;
+  left: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.option-list__search .input {
+  height: 32px;
+  padding-left: var(--space-xl);
+  font-size: var(--font-size-xs);
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-base);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.option-item:hover {
+  background-color: var(--color-primary-light);
+}
+
+.option-item input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* ======================
+   文件上传 / File Upload
+   ====================== */
+.file-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-base);
+  padding: var(--space-2xl) var(--space-lg);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.file-upload:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.file-upload__input {
+  display: none;
+}
+
+.file-upload__icon {
+  color: var(--color-primary);
+}
+
+.file-upload__text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.file-upload__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ======================
+   单选组 / Radio Group
+   ====================== */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.radio-option:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.radio-option input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.radio-option__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
 }

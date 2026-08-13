@@ -97,9 +97,28 @@
       padding-left: var(--space-lg);
     }
 
-    .case-table th:last-child,
+    /* 姓名表头前增加与头像等宽的占位，使表头文字与姓名文字左对齐 */
+    .case-table th:first-child::before {
+      content: "";
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      margin-right: var(--space-sm);
+      vertical-align: middle;
+    }
+
+.case-table th:last-child {
+      text-align: right;
+      padding-right: 110px;
+    }
+
     .case-table td:last-child {
       padding-right: var(--space-lg);
+      text-align: right;
+    }
+
+    .case-table td:last-child .table__actions {
+      justify-content: flex-end;
     }
 
     .case-table tbody tr {
@@ -190,14 +209,14 @@
           <p class="main__subtitle">管理个案档案与干预小组</p>
         </div>
         <div class="main__actions">
-          <button class="btn btn--primary-outline btn--sm" type="button">
+          <button class="btn btn--primary-outline btn--sm" type="button" id="btn-create-group">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
             新建小组
           </button>
-          <button class="btn btn--primary btn--sm" type="button">
+          <button class="btn btn--primary btn--sm" type="button" id="btn-add-case">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
@@ -298,13 +317,13 @@
                         </svg>
                         上课
                       </a>
-                      <button class="btn btn--icon" type="button" aria-label="编辑">
+                      <button class="btn btn--icon btn-edit-case" type="button" aria-label="编辑" data-id="1">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                       </button>
-                      <button class="btn btn--icon is-danger" type="button" aria-label="删除">
+                      <button class="btn btn--icon is-danger btn-delete" type="button" aria-label="删除" data-type="case" data-id="1" data-name="2b">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <polyline points="3 6 5 6 21 6"/>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -341,13 +360,13 @@
                         </svg>
                         上课
                       </a>
-                      <button class="btn btn--icon" type="button" aria-label="编辑">
+                      <button class="btn btn--icon btn-edit-case" type="button" aria-label="编辑" data-id="2">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                       </button>
-                      <button class="btn btn--icon is-danger" type="button" aria-label="删除">
+                      <button class="btn btn--icon is-danger btn-delete" type="button" aria-label="删除" data-type="case" data-id="2" data-name="3 的">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <polyline points="3 6 5 6 21 6"/>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -369,19 +388,19 @@
             </div>
             <div class="card__body">
               <div class="group-list">
-                <article class="group-item">
+                <article class="group-item" data-group-id="1">
                   <div class="group-item__info">
                     <span class="group-item__name">group1</span>
                     <span class="group-item__meta">0 名成员</span>
                   </div>
                   <div class="table__actions">
-                    <button class="btn btn--icon" type="button" aria-label="编辑小组">
+                    <button class="btn btn--icon" type="button" aria-label="编辑小组" id="btn-edit-group">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                       </svg>
                     </button>
-                    <button class="btn btn--icon is-danger" type="button" aria-label="删除小组">
+                    <button class="btn btn--icon is-danger" type="button" aria-label="删除小组" id="btn-delete-group" data-id="1">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <polyline points="3 6 5 6 21 6"/>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -399,7 +418,7 @@
             </div>
             <div class="card__body">
               <nav class="quick-list" aria-label="快捷操作">
-                <a class="quick-item" href="#">
+                <a class="quick-item" href="#" id="btn-import">
                   <span class="quick-item__icon">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -409,7 +428,7 @@
                   </span>
                   批量导入个案
                 </a>
-                <a class="quick-item" href="#">
+                <a class="quick-item" href="#" id="btn-export">
                   <span class="quick-item__icon">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -426,5 +445,723 @@
       </div>
     </main>
   </div>
+
+  <!-- ======================
+       弹窗：新建小组
+       ====================== -->
+  <div class="modal" id="modal-create-group" role="dialog" aria-modal="true" aria-labelledby="modal-create-group-title">
+    <div class="modal__container">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modal-create-group-title">新建小组</h3>
+        <button class="modal__close" type="button" aria-label="关闭" data-close="modal-create-group">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-field">
+          <label class="form-field__label" for="create-group-name">小组名称</label>
+          <input class="input" type="text" id="create-group-name" placeholder="请输入小组名称">
+        </div>
+        <div class="form-field">
+          <span class="form-field__label">选择个案</span>
+          <div class="option-list__search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input class="input" type="search" id="create-group-search" placeholder="搜索个案姓名">
+          </div>
+          <div class="option-list" id="create-group-members"></div>
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="create-group-remark">小组备注</label>
+          <textarea class="input" id="create-group-remark" placeholder="请输入小组备注"></textarea>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary btn--sm" type="button" data-close="modal-create-group">取消</button>
+        <button class="btn btn--primary btn--sm" type="button" id="create-group-submit">确认创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================
+       弹窗：确认操作
+       ====================== -->
+  <div class="modal" id="modal-confirm" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title">
+    <div class="modal__container" style="max-width: 400px;">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modal-confirm-title">确认操作</h3>
+        <button class="modal__close" type="button" aria-label="关闭" data-close="modal-confirm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p id="confirm-message" style="color: var(--color-text-primary); font-size: var(--font-size-sm); line-height: var(--line-height-normal);"></p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary btn--sm" type="button" data-close="modal-confirm">取消</button>
+        <button class="btn btn--danger btn--sm" type="button" id="confirm-submit">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================
+       弹窗：编辑小组
+       ====================== -->
+  <div class="modal" id="modal-edit-group" role="dialog" aria-modal="true" aria-labelledby="modal-edit-group-title">
+    <div class="modal__container">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modal-edit-group-title">编辑小组</h3>
+        <button class="modal__close" type="button" aria-label="关闭" data-close="modal-edit-group">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="edit-group-id">
+        <div class="form-field">
+          <label class="form-field__label" for="edit-group-name">小组名称</label>
+          <input class="input" type="text" id="edit-group-name">
+        </div>
+        <div class="form-field">
+          <span class="form-field__label">小组成员</span>
+          <div class="option-list__search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input class="input" type="search" id="edit-group-search" placeholder="搜索个案姓名">
+          </div>
+          <div class="option-list" id="edit-group-members"></div>
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="edit-group-remark">小组备注</label>
+          <textarea class="input" id="edit-group-remark"></textarea>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary btn--sm" type="button" data-close="modal-edit-group">取消</button>
+        <button class="btn btn--primary btn--sm" type="button" id="edit-group-submit">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================
+       弹窗：新增个案
+       ====================== -->
+  <div class="modal" id="modal-add-case" role="dialog" aria-modal="true" aria-labelledby="modal-add-case-title">
+    <div class="modal__container">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modal-add-case-title">新增个案</h3>
+        <button class="modal__close" type="button" aria-label="关闭" data-close="modal-add-case">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-field form-field--row">
+          <div class="form-field">
+            <label class="form-field__label" for="add-case-name">姓名</label>
+            <input class="input" type="text" id="add-case-name" placeholder="请输入姓名">
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="add-case-gender">性别</label>
+            <select class="input" id="add-case-gender">
+              <option value="male">男</option>
+              <option value="female">女</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-field form-field--row">
+          <div class="form-field">
+            <label class="form-field__label" for="add-case-dob">出生年月</label>
+            <input class="input" type="month" id="add-case-dob">
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="add-case-mode">上课形式</label>
+            <select class="input" id="add-case-mode">
+              <option value="one-on-one">1 对 1</option>
+              <option value="group">小组课</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="add-case-platform">康复数据平台</label>
+          <input class="input" type="text" id="add-case-platform" placeholder="请输入平台名称或链接">
+        </div>
+        <div class="form-field form-field--row">
+          <div class="form-field">
+            <label class="form-field__label" for="add-case-pretest">前测结果</label>
+            <input class="input" type="text" id="add-case-pretest" placeholder="请输入前测结果">
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="add-case-posttest">后测结果</label>
+            <input class="input" type="text" id="add-case-posttest" placeholder="请输入后测结果">
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="add-case-plan">已有干预计划</label>
+          <textarea class="input" id="add-case-plan" placeholder="请输入已有干预计划"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="add-case-remark">备注</label>
+          <textarea class="input" id="add-case-remark" placeholder="请输入备注"></textarea>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary btn--sm" type="button" data-close="modal-add-case">取消</button>
+        <button class="btn btn--primary btn--sm" type="button" id="add-case-submit">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================
+       弹窗：批量导入
+       ====================== -->
+  <div class="modal" id="modal-import" role="dialog" aria-modal="true" aria-labelledby="modal-import-title">
+    <div class="modal__container">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modal-import-title">批量导入个案</h3>
+        <button class="modal__close" type="button" aria-label="关闭" data-close="modal-import">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <label class="file-upload" for="import-file">
+          <input class="file-upload__input" type="file" id="import-file" accept=".xlsx,.xls,.doc,.docx">
+          <svg class="file-upload__icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span class="file-upload__text">点击或拖拽文件至此处</span>
+          <span class="file-upload__hint">支持 xlsx、xls、word 等格式</span>
+        </label>
+        <p id="import-file-name" class="form-field__hint" style="margin-top: var(--space-sm); text-align: center;"></p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary btn--sm" type="button" data-close="modal-import">取消</button>
+        <button class="btn btn--primary btn--sm" type="button" id="import-submit">开始导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================
+       弹窗：导出档案
+       ====================== -->
+  <div class="modal" id="modal-export" role="dialog" aria-modal="true" aria-labelledby="modal-export-title">
+    <div class="modal__container" style="max-width: 400px;">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modal-export-title">导出个案档案</h3>
+        <button class="modal__close" type="button" aria-label="关闭" data-close="modal-export">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <span class="form-field__label">选择导出格式</span>
+        <div class="radio-group" style="margin-top: var(--space-sm);">
+          <label class="radio-option">
+            <input type="radio" name="export-format" value="xlsx" checked>
+            <span class="radio-option__label">Excel 表格（.xlsx）</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="export-format" value="csv">
+            <span class="radio-option__label">CSV 文本（.csv）</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary btn--sm" type="button" data-close="modal-export">取消</button>
+        <button class="btn btn--primary btn--sm" type="button" id="export-submit">确认导出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================
+       弹窗：编辑个案
+       ====================== -->
+  <div class="modal" id="modal-edit-case" role="dialog" aria-modal="true" aria-labelledby="modal-edit-case-title">
+    <div class="modal__container">
+      <div class="modal__header">
+        <h3 class="modal__title" id="modal-edit-case-title">编辑个案</h3>
+        <button class="modal__close" type="button" aria-label="关闭" data-close="modal-edit-case">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="edit-case-id">
+        <div class="form-field form-field--row">
+          <div class="form-field">
+            <label class="form-field__label" for="edit-case-name">姓名</label>
+            <input class="input" type="text" id="edit-case-name">
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="edit-case-gender">性别</label>
+            <select class="input" id="edit-case-gender">
+              <option value="male">男</option>
+              <option value="female">女</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-field form-field--row">
+          <div class="form-field">
+            <label class="form-field__label" for="edit-case-dob">出生年月</label>
+            <input class="input" type="month" id="edit-case-dob">
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="edit-case-mode">上课形式</label>
+            <select class="input" id="edit-case-mode">
+              <option value="one-on-one">1 对 1</option>
+              <option value="group">小组课</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="edit-case-platform">康复数据平台</label>
+          <input class="input" type="text" id="edit-case-platform">
+        </div>
+        <div class="form-field form-field--row">
+          <div class="form-field">
+            <label class="form-field__label" for="edit-case-pretest">前测结果</label>
+            <input class="input" type="text" id="edit-case-pretest">
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="edit-case-posttest">后测结果</label>
+            <input class="input" type="text" id="edit-case-posttest">
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="edit-case-plan">已有干预计划</label>
+          <textarea class="input" id="edit-case-plan"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-field__label" for="edit-case-remark">备注</label>
+          <textarea class="input" id="edit-case-remark"></textarea>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary btn--sm" type="button" data-close="modal-edit-case">取消</button>
+        <button class="btn btn--primary btn--sm" type="button" id="edit-case-submit">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    let cases = [
+      { id: 1, name: '2b', gender: 'male', dob: '', platform: '', pretest: '', posttest: '', plan: '', mode: 'one-on-one', remark: '' },
+      { id: 2, name: '3 的', gender: 'male', dob: '', platform: '', pretest: '', posttest: '', plan: '', mode: 'one-on-one', remark: '' }
+    ];
+    let groups = [
+      { id: 1, name: 'group1', members: [], remark: '' }
+    ];
+    let nextCaseId = 3;
+    let nextGroupId = 2;
+    let confirmCallback = null;
+
+    function $(selector) { return document.querySelector(selector); }
+    function $$(selector) { return document.querySelectorAll(selector); }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+
+    function getAvatarText(name) {
+      return name ? name.trim().slice(0, 1) : '?';
+    }
+
+    function formatGender(value) {
+      return value === 'male' ? '男' : value === 'female' ? '女' : '—';
+    }
+
+    function formatMode(value) {
+      return value === 'one-on-one' ? '1 对 1' : value === 'group' ? '小组课' : '—';
+    }
+
+    function calculateAge(dob) {
+      if (!dob) return '—';
+      const birth = new Date(dob + '-01');
+      const now = new Date();
+      let age = now.getFullYear() - birth.getFullYear();
+      const m = now.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+      return age >= 0 ? age : '—';
+    }
+
+    function formatDob(dob) {
+      if (!dob) return '—';
+      const parts = dob.split('-');
+      return parts[0] + ' 年 ' + parts[1] + ' 月';
+    }
+
+    function updateStats() {
+      const total = cases.length;
+      const groupCount = groups.length;
+      const memberCount = groups.reduce(function (sum, g) { return sum + g.members.length; }, 0);
+
+      const totalEl = $('.stat-card--primary .stat-card__value');
+      if (totalEl) totalEl.textContent = total;
+
+      const groupCountEl = $('.stat-card--secondary .stat-card__value');
+      if (groupCountEl) groupCountEl.textContent = groupCount;
+
+      const groupMetaEl = $('.stat-card--secondary .stat-card__trend');
+      if (groupMetaEl) groupMetaEl.textContent = '共 ' + memberCount + ' 名成员';
+
+      const recentEl = $('.stat-card--accent .stat-card__value');
+      if (recentEl) recentEl.textContent = total;
+    }
+
+    function renderCases() {
+      const tbody = $('.case-table tbody');
+      if (!tbody) return;
+      tbody.innerHTML = cases.map(function (c) {
+        return '<tr>' +
+          '<td><div class="case-name"><div class="avatar" aria-hidden="true">' + getAvatarText(c.name) + '</div><span class="case-name__text">' + escapeHtml(c.name) + '</span></div></td>' +
+          '<td>' + formatGender(c.gender) + '</td>' +
+          '<td class="text-muted">' + formatDob(c.dob) + '</td>' +
+          '<td class="text-muted">' + calculateAge(c.dob) + '</td>' +
+          '<td><span class="tag tag--primary">' + formatMode(c.mode) + '</span></td>' +
+          '<td class="text-muted">' + (c.remark ? escapeHtml(c.remark) : '—') + '</td>' +
+          '<td>' +
+            '<div class="table__actions">' +
+              '<a class="table__action" href="case-detail.html"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>数据平台</a>' +
+              '<a class="table__action" href="#"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>上课</a>' +
+              '<button class="btn btn--icon btn-edit-case" type="button" aria-label="编辑" data-id="' + c.id + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+              '<button class="btn btn--icon is-danger btn-delete" type="button" aria-label="删除" data-type="case" data-id="' + c.id + '" data-name="' + escapeHtml(c.name) + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
+            '</div>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+
+      const countEl = $('#case-title + .text-muted');
+      if (countEl) countEl.textContent = '共 ' + cases.length + ' 条记录';
+      updateStats();
+      bindActionButtons();
+    }
+
+    function renderGroups() {
+      const list = $('.group-list');
+      if (!list) return;
+      list.innerHTML = groups.map(function (g) {
+        return '<article class="group-item" data-group-id="' + g.id + '">' +
+          '<div class="group-item__info"><span class="group-item__name">' + escapeHtml(g.name) + '</span><span class="group-item__meta">' + g.members.length + ' 名成员</span></div>' +
+          '<div class="table__actions">' +
+            '<button class="btn btn--icon btn-edit-group" type="button" aria-label="编辑小组" data-id="' + g.id + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+            '<button class="btn btn--icon is-danger btn-delete" type="button" aria-label="删除小组" data-type="group" data-id="' + g.id + '" data-name="' + escapeHtml(g.name) + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
+          '</div>' +
+        '</article>';
+      }).join('');
+      updateStats();
+      bindGroupButtons();
+      bindActionButtons();
+    }
+
+    function renderCaseOptions(containerId, selectedIds) {
+      const container = $('#' + containerId);
+      if (!container) return;
+      if (cases.length === 0) {
+        container.innerHTML = '<p class="form-field__hint">暂无可选个案</p>';
+        return;
+      }
+      container.innerHTML = cases.map(function (c) {
+        return '<label class="option-item"><input type="checkbox" value="' + c.id + '"' + (selectedIds.indexOf(c.id) !== -1 ? ' checked' : '') + '><span>' + escapeHtml(c.name) + '</span></label>';
+      }).join('');
+    }
+
+    function filterCaseOptions(containerId, query) {
+      const container = $('#' + containerId);
+      if (!container) return;
+      const items = container.querySelectorAll('.option-item');
+      const q = query.toLowerCase().trim();
+      items.forEach(function (item) {
+        const text = item.textContent.trim().toLowerCase();
+        item.style.display = text.indexOf(q) !== -1 ? 'flex' : 'none';
+      });
+    }
+
+    function openModal(id) {
+      const modal = $('#' + id);
+      if (!modal) return;
+      modal.classList.add('is-open');
+      requestAnimationFrame(function () { modal.classList.add('is-visible'); });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+      const modal = $('#' + id);
+      if (!modal) return;
+      modal.classList.remove('is-visible');
+      setTimeout(function () {
+        modal.classList.remove('is-open');
+        document.body.style.overflow = '';
+      }, 200);
+    }
+
+    function setupConfirm(title, message, onConfirm) {
+      $('#modal-confirm-title').textContent = title;
+      $('#confirm-message').textContent = message;
+      confirmCallback = onConfirm;
+      openModal('modal-confirm');
+    }
+
+    function getFormCaseValues(prefix) {
+      return {
+        name: $('#' + prefix + '-name').value.trim(),
+        gender: $('#' + prefix + '-gender').value,
+        dob: $('#' + prefix + '-dob').value,
+        platform: $('#' + prefix + '-platform').value.trim(),
+        pretest: $('#' + prefix + '-pretest').value.trim(),
+        posttest: $('#' + prefix + '-posttest').value.trim(),
+        plan: $('#' + prefix + '-plan').value.trim(),
+        mode: $('#' + prefix + '-mode').value,
+        remark: $('#' + prefix + '-remark').value.trim()
+      };
+    }
+
+    function setFormCaseValues(prefix, c) {
+      $('#' + prefix + '-id').value = c.id;
+      $('#' + prefix + '-name').value = c.name;
+      $('#' + prefix + '-gender').value = c.gender || 'male';
+      $('#' + prefix + '-dob').value = c.dob || '';
+      $('#' + prefix + '-platform').value = c.platform || '';
+      $('#' + prefix + '-pretest').value = c.pretest || '';
+      $('#' + prefix + '-posttest').value = c.posttest || '';
+      $('#' + prefix + '-plan').value = c.plan || '';
+      $('#' + prefix + '-mode').value = c.mode || 'one-on-one';
+      $('#' + prefix + '-remark').value = c.remark || '';
+    }
+
+    function clearFormCaseValues(prefix) {
+      $('#' + prefix + '-name').value = '';
+      $('#' + prefix + '-gender').value = 'male';
+      $('#' + prefix + '-dob').value = '';
+      $('#' + prefix + '-platform').value = '';
+      $('#' + prefix + '-pretest').value = '';
+      $('#' + prefix + '-posttest').value = '';
+      $('#' + prefix + '-plan').value = '';
+      $('#' + prefix + '-mode').value = 'one-on-one';
+      $('#' + prefix + '-remark').value = '';
+    }
+
+    function getSelectedMemberIds(containerId) {
+      return Array.prototype.map.call($$('#' + containerId + ' input[type="checkbox"]:checked'), function (cb) {
+        return parseInt(cb.value, 10);
+      });
+    }
+
+    function bindActionButtons() {
+      $$('.btn-edit-case').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const id = parseInt(btn.dataset.id, 10);
+          const c = cases.find(function (x) { return x.id === id; });
+          if (!c) return;
+          setFormCaseValues('edit-case', c);
+          openModal('modal-edit-case');
+        });
+      });
+
+      $$('.btn-delete').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const type = btn.dataset.type;
+          const id = parseInt(btn.dataset.id, 10);
+          const name = btn.dataset.name;
+          if (type === 'case') {
+            setupConfirm('删除个案', '确定要删除个案「' + name + '」吗？删除后不可恢复。', function () {
+              cases = cases.filter(function (x) { return x.id !== id; });
+              groups.forEach(function (g) { g.members = g.members.filter(function (mid) { return mid !== id; }); });
+              renderCases();
+              renderGroups();
+              closeModal('modal-confirm');
+            });
+          } else if (type === 'group') {
+            setupConfirm('删除小组', '确定要删除小组「' + name + '」吗？删除后不可恢复。', function () {
+              groups = groups.filter(function (g) { return g.id !== id; });
+              renderGroups();
+              closeModal('modal-confirm');
+            });
+          }
+        });
+      });
+    }
+
+    function bindGroupButtons() {
+      $$('.btn-edit-group').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const id = parseInt(btn.dataset.id, 10);
+          const g = groups.find(function (x) { return x.id === id; });
+          if (!g) return;
+          $('#edit-group-id').value = g.id;
+          $('#edit-group-name').value = g.name;
+          $('#edit-group-remark').value = g.remark;
+          $('#edit-group-search').value = '';
+          renderCaseOptions('edit-group-members', g.members);
+          openModal('modal-edit-group');
+        });
+      });
+    }
+
+    function init() {
+      bindActionButtons();
+      renderGroups();
+
+      $$('[data-close]').forEach(function (btn) {
+        btn.addEventListener('click', function () { closeModal(btn.dataset.close); });
+      });
+
+      $$('.modal').forEach(function (modal) {
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) closeModal(modal.id);
+        });
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          $$('.modal.is-visible').forEach(function (modal) { closeModal(modal.id); });
+        }
+      });
+
+      $('#btn-create-group').addEventListener('click', function () {
+        $('#create-group-name').value = '';
+        $('#create-group-remark').value = '';
+        $('#create-group-search').value = '';
+        renderCaseOptions('create-group-members', []);
+        openModal('modal-create-group');
+      });
+
+      $('#create-group-search').addEventListener('input', function () {
+        filterCaseOptions('create-group-members', this.value);
+      });
+
+      $('#create-group-submit').addEventListener('click', function () {
+        const name = $('#create-group-name').value.trim();
+        if (!name) { alert('请输入小组名称'); return; }
+        groups.push({
+          id: nextGroupId++,
+          name: name,
+          members: getSelectedMemberIds('create-group-members'),
+          remark: $('#create-group-remark').value.trim()
+        });
+        renderGroups();
+        closeModal('modal-create-group');
+      });
+
+      $('#edit-group-search').addEventListener('input', function () {
+        filterCaseOptions('edit-group-members', this.value);
+      });
+
+      $('#edit-group-submit').addEventListener('click', function () {
+        const id = parseInt($('#edit-group-id').value, 10);
+        const g = groups.find(function (x) { return x.id === id; });
+        if (!g) return;
+        const name = $('#edit-group-name').value.trim();
+        if (!name) { alert('请输入小组名称'); return; }
+        g.name = name;
+        g.members = getSelectedMemberIds('edit-group-members');
+        g.remark = $('#edit-group-remark').value.trim();
+        renderGroups();
+        closeModal('modal-edit-group');
+      });
+
+      $('#btn-add-case').addEventListener('click', function () {
+        clearFormCaseValues('add-case');
+        openModal('modal-add-case');
+      });
+
+      $('#add-case-submit').addEventListener('click', function () {
+        const values = getFormCaseValues('add-case');
+        if (!values.name) { alert('请输入姓名'); return; }
+        cases.push(Object.assign({ id: nextCaseId++ }, values));
+        renderCases();
+        closeModal('modal-add-case');
+      });
+
+      $('#edit-case-submit').addEventListener('click', function () {
+        const id = parseInt($('#edit-case-id').value, 10);
+        const c = cases.find(function (x) { return x.id === id; });
+        if (!c) return;
+        const values = getFormCaseValues('edit-case');
+        if (!values.name) { alert('请输入姓名'); return; }
+        Object.assign(c, values);
+        renderCases();
+        closeModal('modal-edit-case');
+      });
+
+      $('#btn-import').addEventListener('click', function (e) {
+        e.preventDefault();
+        $('#import-file').value = '';
+        $('#import-file-name').textContent = '';
+        openModal('modal-import');
+      });
+
+      $('#import-file').addEventListener('change', function () {
+        const file = $('#import-file').files[0];
+        $('#import-file-name').textContent = file ? '已选择：' + file.name : '';
+      });
+
+      $('#import-submit').addEventListener('click', function () {
+        const file = $('#import-file').files[0];
+        if (!file) { alert('请选择要导入的文件'); return; }
+        cases.push({
+          id: nextCaseId++,
+          name: '导入个案 ' + nextCaseId,
+          gender: 'male',
+          dob: '',
+          platform: '',
+          pretest: '',
+          posttest: '',
+          plan: '',
+          mode: 'one-on-one',
+          remark: '来自 ' + file.name
+        });
+        renderCases();
+        closeModal('modal-import');
+        alert('导入成功');
+      });
+
+      $('#btn-export').addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal('modal-export');
+      });
+
+      $('#export-submit').addEventListener('click', function () {
+        const format = document.querySelector('input[name="export-format"]:checked').value;
+        closeModal('modal-export');
+        alert('已导出为 ' + format.toUpperCase() + ' 格式');
+      });
+
+      $('#confirm-submit').addEventListener('click', function () {
+        if (confirmCallback) {
+          confirmCallback();
+          confirmCallback = null;
+        }
+      });
+    }
+
+    init();
+  })();
+  </script>
 </body>
 </html>
