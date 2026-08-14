@@ -158,6 +158,106 @@
       width: 28px;
       height: 28px;
     }
+
+    /* 编辑小组：当前成员列表 */
+    .member-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-sm);
+    }
+
+    .member-list__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-base);
+      padding: var(--space-sm) var(--space-base);
+      background-color: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+    }
+
+    .member-list__name {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+    }
+
+    .member-list__empty {
+      padding: var(--space-base);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-tertiary);
+      text-align: center;
+      background-color: var(--color-background);
+      border-radius: var(--radius-md);
+    }
+
+    .add-member-toggle {
+      width: 100%;
+      margin-bottom: var(--space-sm);
+    }
+
+    .add-member-panel {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      padding: var(--space-sm);
+      background-color: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+    }
+
+    .add-member-panel.is-hidden {
+      display: none;
+    }
+
+    .add-member-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .add-member-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-base);
+      padding: var(--space-sm) var(--space-base);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+    }
+
+    .add-member-item__name {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+    }
+
+    .btn--text {
+      height: auto;
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--font-size-xs);
+      color: var(--color-primary);
+      background-color: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+
+    .btn--text:hover {
+      background-color: var(--color-primary-light);
+    }
+
+    .btn--text.is-danger {
+      color: var(--color-error);
+    }
+
+    .btn--text.is-danger:hover {
+      background-color: var(--color-error-light);
+    }
   </style>
 </head>
 <body>
@@ -534,14 +634,24 @@
         </div>
         <div class="form-field">
           <span class="form-field__label">小组成员</span>
-          <div class="option-list__search">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <div class="member-list" id="edit-group-current-members"></div>
+          <button class="btn btn--primary-outline btn--sm add-member-toggle" type="button" id="edit-group-add-toggle">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            <input class="input" type="search" id="edit-group-search" placeholder="搜索个案姓名">
+            新增成员
+          </button>
+          <div class="add-member-panel is-hidden" id="edit-group-add-panel">
+            <div class="option-list__search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input class="input" type="search" id="edit-group-add-search" placeholder="搜索个案姓名">
+            </div>
+            <div class="add-member-list" id="edit-group-add-members"></div>
           </div>
-          <div class="option-list" id="edit-group-members"></div>
         </div>
         <div class="form-field">
           <label class="form-field__label" for="edit-group-remark">小组备注</label>
@@ -1007,6 +1117,42 @@
       });
     }
 
+    function renderCurrentMembers(group) {
+      const container = $('#edit-group-current-members');
+      if (!container) return;
+      const memberCases = cases.filter(function (c) { return group.members.indexOf(c.id) !== -1; });
+      if (memberCases.length === 0) {
+        container.innerHTML = '<p class="member-list__empty">暂无小组成员</p>';
+        return;
+      }
+      container.innerHTML = memberCases.map(function (c) {
+        return '<div class="member-list__item" data-case-id="' + c.id + '">' +
+          '<span class="member-list__name">' + escapeHtml(c.name) + '</span>' +
+          '<button class="btn--text is-danger btn-remove-member" type="button" data-case-id="' + c.id + '">删除</button>' +
+          '</div>';
+      }).join('');
+    }
+
+    function renderAddMemberList(group, query) {
+      const container = $('#edit-group-add-members');
+      if (!container) return;
+      const q = query.toLowerCase().trim();
+      const availableCases = cases.filter(function (c) {
+        return group.members.indexOf(c.id) === -1 &&
+          (q === '' || c.name.toLowerCase().indexOf(q) !== -1);
+      });
+      if (availableCases.length === 0) {
+        container.innerHTML = '<p class="member-list__empty">暂无可添加个案</p>';
+        return;
+      }
+      container.innerHTML = availableCases.map(function (c) {
+        return '<div class="add-member-item" data-case-id="' + c.id + '">' +
+          '<span class="add-member-item__name">' + escapeHtml(c.name) + '</span>' +
+          '<button class="btn--text btn-add-member" type="button" data-case-id="' + c.id + '">新增</button>' +
+          '</div>';
+      }).join('');
+    }
+
     function bindGroupButtons() {
       $$('.btn-edit-group').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -1016,8 +1162,10 @@
           $('#edit-group-id').value = g.id;
           $('#edit-group-name').value = g.name;
           $('#edit-group-remark').value = g.remark;
-          $('#edit-group-search').value = '';
-          renderCaseOptions('edit-group-members', g.members);
+          $('#edit-group-add-search').value = '';
+          $('#edit-group-add-panel').classList.add('is-hidden');
+          renderCurrentMembers(g);
+          renderAddMemberList(g, '');
           openModal('modal-edit-group');
         });
       });
@@ -1068,8 +1216,47 @@
         closeModal('modal-create-group');
       });
 
-      $('#edit-group-search').addEventListener('input', function () {
-        filterCaseOptions('edit-group-members', this.value);
+      $('#edit-group-add-toggle').addEventListener('click', function () {
+        const panel = $('#edit-group-add-panel');
+        panel.classList.toggle('is-hidden');
+        if (!panel.classList.contains('is-hidden')) {
+          $('#edit-group-add-search').focus();
+          const id = parseInt($('#edit-group-id').value, 10);
+          const g = groups.find(function (x) { return x.id === id; });
+          if (g) renderAddMemberList(g, $('#edit-group-add-search').value);
+        }
+      });
+
+      $('#edit-group-add-search').addEventListener('input', function () {
+        const id = parseInt($('#edit-group-id').value, 10);
+        const g = groups.find(function (x) { return x.id === id; });
+        if (g) renderAddMemberList(g, this.value);
+      });
+
+      $('#edit-group-current-members').addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-remove-member');
+        if (!btn) return;
+        const caseId = parseInt(btn.dataset.caseId, 10);
+        const id = parseInt($('#edit-group-id').value, 10);
+        const g = groups.find(function (x) { return x.id === id; });
+        if (!g) return;
+        g.members = g.members.filter(function (mid) { return mid !== caseId; });
+        renderCurrentMembers(g);
+        renderAddMemberList(g, $('#edit-group-add-search').value);
+      });
+
+      $('#edit-group-add-members').addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-add-member');
+        if (!btn) return;
+        const caseId = parseInt(btn.dataset.caseId, 10);
+        const id = parseInt($('#edit-group-id').value, 10);
+        const g = groups.find(function (x) { return x.id === id; });
+        if (!g) return;
+        if (g.members.indexOf(caseId) === -1) {
+          g.members.push(caseId);
+        }
+        renderCurrentMembers(g);
+        renderAddMemberList(g, $('#edit-group-add-search').value);
       });
 
       $('#edit-group-submit').addEventListener('click', function () {
@@ -1079,7 +1266,6 @@
         const name = $('#edit-group-name').value.trim();
         if (!name) { alert('请输入小组名称'); return; }
         g.name = name;
-        g.members = getSelectedMemberIds('edit-group-members');
         g.remark = $('#edit-group-remark').value.trim();
         renderGroups();
         closeModal('modal-edit-group');

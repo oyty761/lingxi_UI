@@ -403,6 +403,138 @@
       white-space: pre-wrap;
     }
 
+    .evaluation-detail__section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .evaluation-detail__section-title {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+    }
+
+    /* 评价评分展示 */
+    .evaluation-ratings {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-base);
+    }
+
+    .evaluation-rating {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-base);
+      padding: var(--space-sm) var(--space-base);
+      background-color: var(--color-background);
+      border-radius: var(--radius-md);
+    }
+
+    .evaluation-rating__label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+    }
+
+    .evaluation-rating__score {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .evaluation-rating__dot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-tertiary);
+    }
+
+    .evaluation-rating__dot svg {
+      fill: none;
+    }
+
+    .evaluation-rating__dot.is-active {
+      color: var(--color-primary);
+    }
+
+    .evaluation-rating__dot.is-active svg {
+      fill: currentColor;
+    }
+
+    /* 评分编辑 */
+    .rating-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-base);
+    }
+
+    .rating-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-base);
+      padding: var(--space-sm) var(--space-base);
+      background-color: var(--color-background);
+      border-radius: var(--radius-md);
+    }
+
+    .rating-group__label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+    }
+
+    .rating-options {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .rating-option {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: background-color var(--transition-fast);
+    }
+
+    .rating-option:hover {
+      background-color: var(--color-primary-light);
+    }
+
+    .rating-option input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .rating-option__value {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-tertiary);
+    }
+
+    .rating-option__value svg {
+      fill: none;
+    }
+
+    .rating-option input:checked + .rating-option__value {
+      color: var(--color-primary);
+    }
+
+    .rating-option input:checked + .rating-option__value svg {
+      fill: currentColor;
+    }
+
+    .rating-option input:focus-visible + .rating-option__value {
+      box-shadow: 0 0 0 3px var(--color-primary-light);
+    }
+
     @media (max-width: 1024px) {
       .detail-stats {
         grid-template-columns: repeat(2, 1fr);
@@ -707,7 +839,11 @@
               <span id="evaluation-view-date"></span>
               <span class="tag tag--primary" id="evaluation-view-course"></span>
             </div>
-            <p class="evaluation-detail__content" id="evaluation-view-content"></p>
+            <div class="evaluation-ratings" id="evaluation-view-ratings"></div>
+            <div class="evaluation-detail__section">
+              <span class="evaluation-detail__section-title">补充说明</span>
+              <p class="evaluation-detail__content" id="evaluation-view-content"></p>
+            </div>
           </div>
         </div>
         <!-- 编辑模式 -->
@@ -723,8 +859,12 @@
             </div>
           </div>
           <div class="form-field">
-            <label class="form-field__label" for="evaluation-edit-content">评价内容</label>
-            <textarea class="input" id="evaluation-edit-content" placeholder="请输入评价内容"></textarea>
+            <span class="form-field__label">评价指标（五级制）</span>
+            <div class="rating-list" id="evaluation-edit-ratings"></div>
+          </div>
+          <div class="form-field">
+            <label class="form-field__label" for="evaluation-edit-content">补充说明</label>
+            <textarea class="input" id="evaluation-edit-content" placeholder="请输入补充说明"></textarea>
           </div>
         </div>
       </div>
@@ -744,10 +884,18 @@
       { id: 4, name: '家庭练习录音', date: '2024-03-05', duration: '01:48' }
     ];
 
+    const ratingIndicators = [
+      { key: 'attention', label: '注意力集中' },
+      { key: 'language', label: '语言表达' },
+      { key: 'social', label: '社交互动' },
+      { key: 'task', label: '任务完成' },
+      { key: 'emotion', label: '情绪状态' }
+    ];
+
     let evaluations = [
-      { id: 1, date: '2024-03-12', courseName: '叙事语法基础', content: '今天课堂表现很好，能够完整复述故事的主要情节，人物和场景描述较之前更加清晰。下一步可以加强感受词汇的使用。' },
-      { id: 2, date: '2024-03-10', courseName: '发音训练', content: '发音清晰度有明显提升，/b/、/p/等爆破音掌握较好。需要注意/d/、/t/在词尾的发音完整度。' },
-      { id: 3, date: '2024-03-08', courseName: '词汇扩展', content: '新学词汇掌握较快，能够在提示下正确使用5个新词。建议课后通过绘本复习巩固。' }
+      { id: 1, date: '2024-03-12', courseName: '叙事语法基础', content: '今天课堂表现很好，能够完整复述故事的主要情节，人物和场景描述较之前更加清晰。下一步可以加强感受词汇的使用。', scores: { attention: 4, language: 4, social: 3, task: 4, emotion: 5 } },
+      { id: 2, date: '2024-03-10', courseName: '发音训练', content: '发音清晰度有明显提升，/b/、/p/等爆破音掌握较好。需要注意/d/、/t/在词尾的发音完整度。', scores: { attention: 5, language: 3, social: 3, task: 4, emotion: 4 } },
+      { id: 3, date: '2024-03-08', courseName: '词汇扩展', content: '新学词汇掌握较快，能够在提示下正确使用5个新词。建议课后通过绘本复习巩固。', scores: { attention: 4, language: 4, social: 4, task: 5, emotion: 5 } }
     ];
 
     let playingId = null;
@@ -906,6 +1054,54 @@
       });
     }
 
+    function getStarSvg() {
+      return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    }
+
+    function renderViewRatings(scores) {
+      const container = $('#evaluation-view-ratings');
+      if (!container) return;
+      container.innerHTML = ratingIndicators.map(function (ind) {
+        const score = scores && scores[ind.key] ? scores[ind.key] : 0;
+        return '<div class="evaluation-rating">' +
+          '<span class="evaluation-rating__label">' + ind.label + '</span>' +
+          '<div class="evaluation-rating__score">' +
+          [1, 2, 3, 4, 5].map(function (val) {
+            return '<span class="evaluation-rating__dot ' + (val <= score ? 'is-active' : '') + '">' + getStarSvg() + '</span>';
+          }).join('') +
+          '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    function renderEditRatings(scores) {
+      const container = $('#evaluation-edit-ratings');
+      if (!container) return;
+      container.innerHTML = ratingIndicators.map(function (ind) {
+        const currentScore = scores && scores[ind.key] ? scores[ind.key] : 0;
+        return '<div class="rating-group" data-indicator="' + ind.key + '">' +
+          '<span class="rating-group__label">' + ind.label + '</span>' +
+          '<div class="rating-options">' +
+          [1, 2, 3, 4, 5].map(function (val) {
+            return '<label class="rating-option">' +
+              '<input type="radio" name="rating-' + ind.key + '" value="' + val + '"' + (val === currentScore ? ' checked' : '') + '>' +
+              '<span class="rating-option__value">' + getStarSvg() + '</span>' +
+              '</label>';
+          }).join('') +
+          '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    function getEditScores() {
+      const scores = {};
+      ratingIndicators.forEach(function (ind) {
+        const checked = $('input[name="rating-' + ind.key + '"]:checked');
+        scores[ind.key] = checked ? parseInt(checked.value, 10) : 0;
+      });
+      return scores;
+    }
+
     function openEvaluationView(id) {
       const ev = evaluations.find(function (x) { return x.id === id; });
       if (!ev) return;
@@ -914,6 +1110,7 @@
       $('#evaluation-view-date').textContent = formatDate(ev.date);
       $('#evaluation-view-course').textContent = ev.courseName;
       $('#evaluation-view-content').textContent = ev.content;
+      renderViewRatings(ev.scores);
 
       showEvaluationMode('view');
       openModal('modal-evaluation');
@@ -939,6 +1136,7 @@
         $('#evaluation-edit-date').value = ev.date;
         $('#evaluation-edit-course').value = ev.courseName;
         $('#evaluation-edit-content').value = ev.content;
+        renderEditRatings(ev.scores);
 
         viewSection.style.display = 'none';
         editSection.style.display = 'block';
@@ -978,17 +1176,18 @@
       const content = $('#evaluation-edit-content').value.trim();
 
       if (!courseName) { alert('请输入课程名称'); return; }
-      if (!content) { alert('请输入评价内容'); return; }
 
       ev.date = date;
       ev.courseName = courseName;
       ev.content = content;
+      ev.scores = getEditScores();
 
       renderEvaluations();
       showEvaluationMode('view');
       $('#evaluation-view-date').textContent = formatDate(ev.date);
       $('#evaluation-view-course').textContent = ev.courseName;
       $('#evaluation-view-content').textContent = ev.content;
+      renderViewRatings(ev.scores);
     }
 
     function init() {
