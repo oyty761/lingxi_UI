@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroEdu-Hub 儿童听说读写干预平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        * { font-family: 'Noto Sans SC', sans-serif; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .module-card { transition: all 0.3s ease; cursor: pointer; }
+        .module-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+        .method-card { transition: all 0.25s ease; }
+        .method-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); border-color: #6366f1; }
+        .nav-item { transition: all 0.2s; }
+        .nav-item:hover { background: #f1f5f9; }
+        .nav-item.active { background: #6366f1; color: white; }
+        .sidebar-link { transition: all 0.2s; }
+        .sidebar-link:hover, .sidebar-link.active { background: #eef2ff; color: #6366f1; border-right: 3px solid #6366f1; }
+        .progress-ring { transform: rotate(-90deg); }
+        .tab-btn { padding: 10px 20px; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 500; color: #64748b; }
+        .tab-btn:hover { color: #1e293b; }
+        .tab-btn.active { color: #6366f1; border-bottom-color: #6366f1; }
+        .modal-enter { animation: modalIn 0.3s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .toast { animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s; }
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        .editor-canvas { min-height: 600px; background: #f8fafc; border: 2px dashed #e2e8f0; border-radius: 12px; position: relative; overflow: hidden; }
+        .editor-element { position: absolute; cursor: move; border: 2px solid transparent; border-radius: 8px; transition: all 0.2s; }
+        .editor-element:hover { border-color: #6366f1; }
+        .editor-element.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.3); }
+        .timeline-track { height: 50px; background: #1e293b; border-radius: 6px; position: relative; overflow: hidden; }
+        .timeline-clip { position: absolute; height: 40px; top: 5px; border-radius: 4px; cursor: pointer; }
+        .slide-thumbnail { aspect-ratio: 16/9; background: white; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; transition: all 0.2s; }
+        .slide-thumbnail:hover { border-color: #6366f1; }
+        .slide-thumbnail.active { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+        .asset-tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .asset-tag.video { background: #ede9fe; color: #7c3aed; }
+        .asset-tag.image { background: #fef3c7; color: #d97706; }
+        .asset-tag.audio { background: #d1fae5; color: #059669; }
+        .asset-tag.document { background: #dbeafe; color: #2563eb; }
+        .method-tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .method-tag.listen { background: #dbeafe; color: #1d4ed8; }
+        .method-tag.speak { background: #fce7f3; color: #be185d; }
+        .method-tag.read { background: #fef3c7; color: #b45309; }
+        .method-tag.write { background: #d1fae5; color: #047857; }
+        .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .search-input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; transition: all 0.2s; }
+        .search-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+        .timeline-container { overflow-x: auto; white-space: nowrap; }
+        .intervention-path { position: relative; }
+        .intervention-path::before { content: ''; position: absolute; left: 20px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, #3b82f6, #8b5cf6, #ec4899, #f59e0b); border-radius: 3px; }
+        .fade-in { animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .metric-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .listen-gradient { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+        .speak-gradient { background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); }
+        .read-gradient { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .write-gradient { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
+        .admin-gradient { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+        .method-detail-panel { max-height: 70vh; overflow-y: auto; }
+        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .collapsible-content.open { max-height: 2000px; }
+        .member-card { transition: all 0.3s; }
+        .member-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .payment-status { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+        .level-badge { display: inline-flex; align-items: center; padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .assessment-gradient { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); }
+        .da-flow-step { position: relative; padding-left: 48px; }
+        .da-flow-step::before { content: ''; position: absolute; left: 19px; top: 40px; bottom: -20px; width: 3px; background: #e2e8f0; }
+        .da-flow-step:last-child::before { display: none; }
+        .da-flow-step .step-dot { position: absolute; left: 8px; top: 8px; width: 24px; height: 24px; border-radius: 50%; background: white; border: 3px solid #cbd5e1; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: #64748b; }
+        .da-flow-step.active .step-dot { background: #0d9488; border-color: #0d9488; color: white; box-shadow: 0 0 0 4px rgba(13,148,136,0.2); }
+        .da-flow-step.completed .step-dot { background: #10b981; border-color: #10b981; color: white; }
+        .da-flow-step.pending .step-dot { background: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; }
+        .pretest-gradient { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .mediation-gradient { background: linear-gradient(135deg, #0d9488, #0f766e); }
+        .posttest-gradient { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .result-gradient { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .zpd-bar { transition: width 0.8s ease; }
+        .score-change-up { color: #10b981; }
+        .score-change-down { color: #ef4444; }
+        .score-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .score-badge.improved { background: #d1fae5; color: #047857; }
+        .score-badge.stable { background: #fef3c7; color: #b45309; }
+        .score-badge.declined { background: #fee2e2; color: #b91c1c; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+<!-- ==================== LOGIN MODAL ==================== -->
+<div id="authModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 modal-enter mx-4">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-brain text-white text-2xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">NeuroEdu-Hub</h2>
+            <p class="text-gray-500 mt-1">儿童听说读写干预平台</p>
+            <p class="text-xs text-gray-400 mt-2">基于神经科学 · 言语病理学 · 教育学 · 心理学</p>
+        </div>
+        <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+            <button onclick="switchAuth('login')" id="loginTab" class="flex-1 py-2 rounded-md text-sm font-medium bg-white shadow-sm text-indigo-600 transition-all">登录</button>
+            <button onclick="switchAuth('register')" id="registerTab" class="flex-1 py-2 rounded-md text-sm font-medium text-gray-500 transition-all">注册</button>
+        </div>
+        <div id="loginForm">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">手机号/邮箱</label>
+                    <input type="text" id="loginEmail" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none" placeholder="请输入手机号或邮箱">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                    <input type="password" id="loginPassword" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none" placeholder="请输入密码">
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center"><input type="checkbox" class="mr-2 rounded text-indigo-600"><span class="text-gray-600">记住我</span></label>
+                    <a href="#" class="text-indigo-600 hover:underline">忘记密码？</a>
+                </div>
+                <button onclick="login('therapist')" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all">
+                    <i class="fas fa-sign-in-alt mr-2"></i>登录
+                </button>
+            </div>
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300"></div></div>
+                    <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-gray-500">快速体验</span></div>
+                </div>
+                <div class="mt-4 grid grid-cols-3 gap-3">
+                    <button onclick="login('therapist')" class="py-2 px-4 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-user-md mr-2 text-indigo-600"></i>治疗师
+                    </button>
+                    <button onclick="login('teacher')" class="py-2 px-4 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-chalkboard-teacher mr-2 text-green-600"></i>教师
+                    </button>
+                    <button onclick="login('parent')" class="py-2 px-4 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-home mr-2 text-orange-600"></i>家长
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="registerForm" class="hidden">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">身份类型</label>
+                    <select class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option>言语语言治疗师(SLP)</option>
+                        <option>职能治疗师(OT)</option>
+                        <option>特殊教育教师</option>
+                        <option>心理咨询师</option>
+                        <option>家长</option>
+                        <option>机构管理员</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+                    <input type="tel" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="请输入手机号">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+                    <div class="flex gap-2">
+                        <input type="text" class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="请输入验证码">
+                        <button class="px-4 py-3 bg-gray-100 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-200">获取验证码</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">设置密码</label>
+                    <input type="password" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="8-20位字母数字组合">
+                </div>
+                <div class="flex items-start">
+                    <input type="checkbox" class="mt-1 mr-2 rounded text-indigo-600">
+                    <span class="text-sm text-gray-600">我已阅读并同意<a href="#" class="text-indigo-600">《用户协议》</a>和<a href="#" class="text-indigo-600">《隐私政策》</a></span>
+                </div>
+                <button class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all">注册账号</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MAIN APP ==================== -->
+<div id="mainApp" class="hidden">
+    <!-- Top Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-full mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="switchModule('dashboard')">
+                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-brain text-white"></i>
+                        </div>
+                        <div>
+                            <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">NeuroEdu-Hub</span>
+                            <p class="text-xs text-gray-500">听说读写干预平台</p>
+                        </div>
+                    </div>
+                    <div class="hidden lg:ml-6 lg:flex lg:space-x-1">
+                        <button onclick="switchModule('dashboard')" id="nav-dashboard" class="nav-item active px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-th-large mr-1"></i>工作台</button>
+                        <button onclick="switchModule('listen')" id="nav-listen" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700"><i class="fas fa-ear-listen mr-1 text-blue-500"></i>听的干预</button>
+                        <button onclick="switchModule('speak')" id="nav-speak" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700"><i class="fas fa-comment-dots mr-1 text-pink-500"></i>说的干预</button>
+                        <button onclick="switchModule('read')" id="nav-read" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700"><i class="fas fa-book-reader mr-1 text-amber-500"></i>读的干预</button>
+                        <button onclick="switchModule('write')" id="nav-write" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700"><i class="fas fa-pen-fancy mr-1 text-green-500"></i>写的干预</button>
+                        <button onclick="switchModule('studio')" id="nav-studio" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700 relative"><i class="fas fa-video mr-1 text-purple-500"></i>课程工坊</button>
+                        <button onclick="switchModule('assessment')" id="nav-assessment" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700"><i class="fas fa-chart-line mr-1 text-teal-500"></i>动态评估</button>
+                        <button onclick="switchModule('admin')" id="nav-admin" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700"><i class="fas fa-cog mr-1 text-gray-500"></i>系统管理</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button class="p-2 rounded-lg text-gray-400 hover:text-gray-500 relative">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <div class="flex items-center space-x-3 pl-4 border-l border-gray-200">
+                        <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=SLP+Li&background=4F46E5&color=fff" alt="">
+                        <div class="hidden md:block">
+                            <p class="text-sm font-medium text-gray-900" id="userName">李治疗师</p>
+                            <p class="text-xs text-gray-500" id="userRole">言语语言治疗师 · 高级</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==================== MODULE 0: DASHBOARD ==================== -->
+    <div id="dashboardModule" class="module-content">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-900">欢迎回来，<span id="dashUserName">李治疗师</span> <span class="text-2xl">👋</span></h1>
+                <p class="text-gray-500 mt-1">今天是 <span id="currentDate"></span>，NeuroEdu-Hub 儿童听说读写干预平台</p>
+            </div>
+
+            <!-- Five Core Modules Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                <!-- Listen -->
+                <div onclick="switchModule('listen')" class="module-card bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer border border-gray-100">
+                    <div class="h-2 listen-gradient"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-xl listen-gradient flex items-center justify-center">
+                                <i class="fas fa-ear-listen text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">30种方法</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">听的干预</h3>
+                        <p class="text-sm text-gray-500 mb-3">听觉辨别 · 记忆 · 理解 · 专注</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex -space-x-2">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=C1&bg=3B82F6&color=fff" alt="">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=C2&bg=1D4ED8&color=fff" alt="">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=C3&bg=60A5FA&color=fff" alt="">
+                            </div>
+                            <span class="text-xs text-gray-400">12个活跃个案</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Speak -->
+                <div onclick="switchModule('speak')" class="module-card bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer border border-gray-100">
+                    <div class="h-2 speak-gradient"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-xl speak-gradient flex items-center justify-center">
+                                <i class="fas fa-comment-dots text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-pink-600 bg-pink-50 px-2 py-1 rounded-full">30种方法</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">说的干预</h3>
+                        <p class="text-sm text-gray-500 mb-3">发音 · 词汇 · 语法 · 语用 · 流畅性</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex -space-x-2">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=S1&bg=EC4899&color=fff" alt="">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=S2&bg=BE185D&color=fff" alt="">
+                            </div>
+                            <span class="text-xs text-gray-400">8个活跃个案</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Read -->
+                <div onclick="switchModule('read')" class="module-card bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer border border-gray-100">
+                    <div class="h-2 read-gradient"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-xl read-gradient flex items-center justify-center">
+                                <i class="fas fa-book-reader text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full">30种方法</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">读的干预</h3>
+                        <p class="text-sm text-gray-500 mb-3">识字 · 阅读流畅 · 理解策略</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex -space-x-2">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=R1&bg=F59E0B&color=fff" alt="">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=R2&bg=D97706&color=fff" alt="">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=R3&bg=FBBF24&color=fff" alt="">
+                            </div>
+                            <span class="text-xs text-gray-400">15个活跃个案</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Write -->
+                <div onclick="switchModule('write')" class="module-card bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer border border-gray-100">
+                    <div class="h-2 write-gradient"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-xl write-gradient flex items-center justify-center">
+                                <i class="fas fa-pen-fancy text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">30种方法</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">写的干预</h3>
+                        <p class="text-sm text-gray-500 mb-3">书写技能 · 笔画笔顺 · 写作表达</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex -space-x-2">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=W1&bg=10B981&color=fff" alt="">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=W2&bg=047857&color=fff" alt="">
+                            </div>
+                            <span class="text-xs text-gray-400">6个活跃个案</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Dynamic Assessment -->
+                <div onclick="switchModule('assessment')" class="module-card bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer border border-gray-100">
+                    <div class="h-2 assessment-gradient"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-xl assessment-gradient flex items-center justify-center">
+                                <i class="fas fa-chart-line text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-medium text-teal-600 bg-teal-50 px-2 py-1 rounded-full">评估-干预-检测</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">动态评估</h3>
+                        <p class="text-sm text-gray-500 mb-3">评估 · 中介 · 再测 · 效果检测</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex -space-x-2">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=A1&bg=0D9488&color=fff" alt="">
+                                <img class="w-6 h-6 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=A2&bg=0F766E&color=fff" alt="">
+                            </div>
+                            <span class="text-xs text-gray-400">6个进行中</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats + Today's Schedule -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Stats -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-lg font-bold text-gray-900 mb-4">快捷统计</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-users text-blue-600"></i></div>
+                                    <div><p class="text-sm font-medium text-gray-900">在管个案</p><p class="text-xs text-gray-500">本月新增 12 人</p></div>
+                                </div>
+                                <span class="text-xl font-bold text-blue-600">156</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-pink-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center"><i class="fas fa-calendar-check text-pink-600"></i></div>
+                                    <div><p class="text-sm font-medium text-gray-900">今日干预</p><p class="text-xs text-gray-500">已完成 8  sessions</p></div>
+                                </div>
+                                <span class="text-xl font-bold text-pink-600">24</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center"><i class="fas fa-video text-amber-600"></i></div>
+                                    <div><p class="text-sm font-medium text-gray-900">课程工坊</p><p class="text-xs text-gray-500">12个多媒体课件</p></div>
+                                </div>
+                                <span class="text-xl font-bold text-amber-600">36</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-teal-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center"><i class="fas fa-chart-line text-teal-600"></i></div>
+                                    <div><p class="text-sm font-medium text-gray-900">动态评估</p><p class="text-xs text-gray-500">本月完成 18 例</p></div>
+                                </div>
+                                <span class="text-xl font-bold text-teal-600">92%</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-check-double text-green-600"></i></div>
+                                    <div><p class="text-sm font-medium text-gray-900">干预有效率</p><p class="text-xs text-gray-500">较上月 +5%</p></div>
+                                </div>
+                                <span class="text-xl font-bold text-green-600">87%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-lg font-bold text-gray-900 mb-4">快捷操作</h2>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="switchModule('listen')" class="p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors text-center">
+                                <i class="fas fa-ear-listen text-blue-600 text-2xl mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">听的干预</p>
+                            </button>
+                            <button onclick="switchModule('speak')" class="p-4 bg-pink-50 rounded-xl hover:bg-pink-100 transition-colors text-center">
+                                <i class="fas fa-comment-dots text-pink-600 text-2xl mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">说的干预</p>
+                            </button>
+                            <button onclick="switchModule('read')" class="p-4 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors text-center">
+                                <i class="fas fa-book-reader text-amber-600 text-2xl mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">读的干预</p>
+                            </button>
+                            <button onclick="switchModule('write')" class="p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors text-center">
+                                <i class="fas fa-pen-fancy text-green-600 text-2xl mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">写的干预</p>
+                            </button>
+                            <button onclick="switchModule('assessment')" class="p-4 bg-teal-50 rounded-xl hover:bg-teal-100 transition-colors text-center">
+                                <i class="fas fa-chart-line text-teal-600 text-2xl mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">动态评估</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Schedule + Recent -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-lg font-bold text-gray-900">今日干预日程</h2>
+                            <button class="text-sm text-indigo-600 hover:underline">查看全部</button>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                                <div class="flex-shrink-0 w-14 text-center">
+                                    <p class="text-sm font-bold text-blue-600">09:00</p>
+                                    <p class="text-xs text-gray-400">10:00</p>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="font-semibold text-gray-900">听觉辨别训练 - 张小明</h3>
+                                        <span class="method-tag listen">听的干预</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">8岁3月 | 目标：辨别相似音 /ba/ /pa/ · 第5次训练</p>
+                                </div>
+                                <button onclick="switchModule('listen')" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">开始</button>
+                            </div>
+                            <div class="flex items-start space-x-4 p-4 bg-pink-50 rounded-lg border-l-4 border-pink-500">
+                                <div class="flex-shrink-0 w-14 text-center">
+                                    <p class="text-sm font-bold text-pink-600">10:30</p>
+                                    <p class="text-xs text-gray-400">11:15</p>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="font-semibold text-gray-900">语音模仿训练 - 王小华</h3>
+                                        <span class="method-tag speak">说的干预</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">6岁8月 | 目标：正确发音 g/k · 第3次训练</p>
+                                </div>
+                                <button onclick="switchModule('speak')" class="px-4 py-2 bg-pink-600 text-white text-sm rounded-lg hover:bg-pink-700">开始</button>
+                            </div>
+                            <div class="flex items-start space-x-4 p-4 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                                <div class="flex-shrink-0 w-14 text-center">
+                                    <p class="text-sm font-bold text-amber-600">14:00</p>
+                                    <p class="text-xs text-gray-400">15:00</p>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="font-semibold text-gray-900">阅读流畅性训练 - 李小红</h3>
+                                        <span class="method-tag read">读的干预</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">9岁2月 | 目标：分级阅读Level 3 · 第8次训练</p>
+                                </div>
+                                <button onclick="switchModule('read')" class="px-4 py-2 bg-amber-600 text-white text-sm rounded-lg hover:bg-amber-700">开始</button>
+                            </div>
+                            <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                                <div class="flex-shrink-0 w-14 text-center">
+                                    <p class="text-sm font-bold text-green-600">15:30</p>
+                                    <p class="text-xs text-gray-400">16:30</p>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="font-semibold text-gray-900">书写技能训练 - 赵小刚</h3>
+                                        <span class="method-tag write">写的干预</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">8岁 | 目标：笔画笔顺 · 间架结构 · 第6次训练</p>
+                                </div>
+                                <button onclick="switchModule('write')" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">开始</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Course Studio -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-video mr-2 text-purple-500"></i>课程工坊 - 最近编辑</h2>
+                            <button onclick="switchModule('studio')" class="text-sm text-purple-600 hover:underline">进入课程工坊</button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-purple-300 transition-all" onclick="switchModule('studio')">
+                                <div class="aspect-video bg-gradient-to-br from-blue-100 to-indigo-200 rounded-lg mb-3 flex items-center justify-center relative">
+                                    <i class="fas fa-wave-square text-blue-500 text-3xl"></i>
+                                    <div class="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">12:30</div>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 text-sm">听觉辨别训练课程</h4>
+                                <p class="text-xs text-gray-500 mt-1">3视频 · 8图片 · 5互动</p>
+                                <span class="status-badge draft mt-2">草稿</span>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-purple-300 transition-all" onclick="switchModule('studio')">
+                                <div class="aspect-video bg-gradient-to-br from-pink-100 to-rose-200 rounded-lg mb-3 flex items-center justify-center relative">
+                                    <i class="fas fa-comment-dots text-pink-500 text-3xl"></i>
+                                    <div class="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">08:45</div>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 text-sm">语音模仿训练课件</h4>
+                                <p class="text-xs text-gray-500 mt-1">2视频 · 12图片 · 8互动</p>
+                                <span class="status-badge published mt-2">已发布</span>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-purple-300 transition-all" onclick="switchModule('studio')">
+                                <div class="aspect-video bg-gradient-to-br from-amber-100 to-orange-200 rounded-lg mb-3 flex items-center justify-center relative">
+                                    <i class="fas fa-book-open text-amber-500 text-3xl"></i>
+                                    <div class="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">15:20</div>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 text-sm">阅读流畅性训练课件</h4>
+                                <p class="text-xs text-gray-500 mt-1">1视频 · 15图片 · 6互动</p>
+                                <span class="status-badge review mt-2">审核中</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODULE 1: LISTENING INTERVENTION ==================== -->
+    <div id="listenModule" class="module-content hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900"><i class="fas fa-ear-listen mr-2 text-blue-600"></i>听的干预</h1>
+                    <p class="text-gray-500 mt-1">30种系统化干预方法 · 提升听觉辨别、记忆、理解、专注能力</p>
+                </div>
+                <div class="flex space-x-3">
+                    <div class="relative">
+                        <input type="text" id="listenSearch" oninput="filterMethods('listen', this.value)" placeholder="搜索干预方法..." class="search-input pl-10 pr-4 py-2 w-64">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    </div>
+                    <button onclick="showToast('开始新的听觉评估')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-plus mr-2"></i>新建干预计划
+                    </button>
+                </div>
+            </div>
+
+            <!-- Goal Overview -->
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-6 mb-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold mb-2">听模块干预目标</h2>
+                        <p class="text-blue-100">听的清楚 · 听的明白 · 听能理解</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="flex space-x-6">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold">30</p>
+                                <p class="text-sm text-blue-200">干预方法</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold">12</p>
+                                <p class="text-sm text-blue-200">活跃个案</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold">89%</p>
+                                <p class="text-sm text-blue-200">有效率</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Filters -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button onclick="filterListenCategory('all')" class="listen-filter active px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white transition-all">全部</button>
+                <button onclick="filterListenCategory('discrimination')" class="listen-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all">听觉辨别</button>
+                <button onclick="filterListenCategory('memory')" class="listen-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all">听觉记忆</button>
+                <button onclick="filterListenCategory('comprehension')" class="listen-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all">听觉理解</button>
+                <button onclick="filterListenCategory('attention')" class="listen-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all">听觉专注</button>
+                <button onclick="filterListenCategory('metacognition')" class="listen-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all">元认知策略</button>
+            </div>
+
+            <!-- Methods Grid -->
+            <div id="listenMethodsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Methods will be populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODULE 2: SPEAKING INTERVENTION ==================== -->
+    <div id="speakModule" class="module-content hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900"><i class="fas fa-comment-dots mr-2 text-pink-600"></i>说的干预</h1>
+                    <p class="text-gray-500 mt-1">30种系统化干预方法 · 提升发音、词汇、语法、语用、流畅性</p>
+                </div>
+                <div class="flex space-x-3">
+                    <div class="relative">
+                        <input type="text" id="speakSearch" oninput="filterMethods('speak', this.value)" placeholder="搜索干预方法..." class="search-input pl-10 pr-4 py-2 w-64">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    </div>
+                    <button onclick="showToast('开始新的口语评估')" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">
+                        <i class="fas fa-plus mr-2"></i>新建干预计划
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-pink-500 to-rose-600 rounded-2xl p-6 mb-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold mb-2">说模块干预目标</h2>
+                        <p class="text-pink-100">说得有逻辑 · 口语语用好 · 能对话交流 · 读音清晰</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="flex space-x-6">
+                            <div class="text-center"><p class="text-3xl font-bold">30</p><p class="text-sm text-pink-200">干预方法</p></div>
+                            <div class="text-center"><p class="text-3xl font-bold">8</p><p class="text-sm text-pink-200">活跃个案</p></div>
+                            <div class="text-center"><p class="text-3xl font-bold">85%</p><p class="text-sm text-pink-200">有效率</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button onclick="filterSpeakCategory('all')" class="speak-filter active px-4 py-2 rounded-full text-sm font-medium bg-pink-600 text-white">全部</button>
+                <button onclick="filterSpeakCategory('articulation')" class="speak-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">发音器官</button>
+                <button onclick="filterSpeakCategory('vocabulary')" class="speak-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">词汇扩展</button>
+                <button onclick="filterSpeakCategory('grammar')" class="speak-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">语法结构</button>
+                <button onclick="filterSpeakCategory('pragmatic')" class="speak-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">语用能力</button>
+                <button onclick="filterSpeakCategory('fluency')" class="speak-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">流畅性</button>
+                <button onclick="filterSpeakCategory('narrative')" class="speak-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">叙事能力</button>
+            </div>
+
+            <div id="speakMethodsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MODULE 3: READING INTERVENTION ==================== -->
+    <div id="readModule" class="module-content hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900"><i class="fas fa-book-reader mr-2 text-amber-600"></i>读的干预</h1>
+                    <p class="text-gray-500 mt-1">30种系统化干预方法 · 识字训练 + 阅读理解双重提升</p>
+                </div>
+                <div class="flex space-x-3">
+                    <div class="relative">
+                        <input type="text" id="readSearch" oninput="filterMethods('read', this.value)" placeholder="搜索干预方法..." class="search-input pl-10 pr-4 py-2 w-64">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    </div>
+                    <button onclick="showToast('开始新的阅读评估')" class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">
+                        <i class="fas fa-plus mr-2"></i>新建干预计划
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl p-6 mb-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold mb-2">读模块干预目标</h2>
+                        <p class="text-amber-100">朗读流畅 · 能理解 · 识字准确 · 喜欢阅读</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="flex space-x-6">
+                            <div class="text-center"><p class="text-3xl font-bold">30</p><p class="text-sm text-amber-200">干预方法</p></div>
+                            <div class="text-center"><p class="text-3xl font-bold">15</p><p class="text-sm text-amber-200">活跃个案</p></div>
+                            <div class="text-center"><p class="text-3xl font-bold">91%</p><p class="text-sm text-amber-200">有效率</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button onclick="filterReadCategory('all')" class="read-filter active px-4 py-2 rounded-full text-sm font-medium bg-amber-600 text-white">全部</button>
+                <button onclick="filterReadCategory('literacy')" class="read-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">识字训练</button>
+                <button onclick="filterReadCategory('fluency')" class="read-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">阅读流畅</button>
+                <button onclick="filterReadCategory('comprehension')" class="read-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">阅读理解</button>
+                <button onclick="filterReadCategory('strategy')" class="read-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">阅读策略</button>
+                <button onclick="filterReadCategory('habit')" class="read-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">阅读习惯</button>
+            </div>
+
+            <div id="readMethodsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MODULE 4: WRITING INTERVENTION ==================== -->
+    <div id="writeModule" class="module-content hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900"><i class="fas fa-pen-fancy mr-2 text-green-600"></i>写的干预</h1>
+                    <p class="text-gray-500 mt-1">30种系统化干预方法 · 书写技能(Handwriting) + 写作表达(Writing)</p>
+                </div>
+                <div class="flex space-x-3">
+                    <div class="relative">
+                        <input type="text" id="writeSearch" oninput="filterMethods('write', this.value)" placeholder="搜索干预方法..." class="search-input pl-10 pr-4 py-2 w-64">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    </div>
+                    <button onclick="showToast('开始新的书写评估')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        <i class="fas fa-plus mr-2"></i>新建干预计划
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl p-6 mb-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold mb-2">写模块干预目标</h2>
+                        <p class="text-green-100">书写整齐 · 书写准确 · 听写正确率高 · 能流畅表达</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="flex space-x-6">
+                            <div class="text-center"><p class="text-3xl font-bold">30</p><p class="text-sm text-green-200">干预方法</p></div>
+                            <div class="text-center"><p class="text-3xl font-bold">6</p><p class="text-sm text-green-200">活跃个案</p></div>
+                            <div class="text-center"><p class="text-3xl font-bold">82%</p><p class="text-sm text-green-200">有效率</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Sub-modules -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-xl p-4 border-l-4 border-green-500 shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-pen text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900">书写技能 (Handwriting)</h3>
+                            <p class="text-sm text-gray-500">笔画笔顺 · 间架结构 · 书写速度 · 精细动作</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-4 border-l-4 border-teal-500 shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file-alt text-teal-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900">写作表达 (Writing)</h3>
+                            <p class="text-sm text-gray-500">构思组织 · 句子写作 · 段落写作 · 创意表达</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button onclick="filterWriteCategory('all')" class="write-filter active px-4 py-2 rounded-full text-sm font-medium bg-green-600 text-white">全部</button>
+                <button onclick="filterWriteCategory('handwriting')" class="write-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">书写技能</button>
+                <button onclick="filterWriteCategory('copying')" class="write-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">抄写训练</button>
+                <button onclick="filterWriteCategory('dictation')" class="write-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">听写训练</button>
+                <button onclick="filterWriteCategory('composition')" class="write-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">写作表达</button>
+                <button onclick="filterWriteCategory('spelling')" class="write-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">拼写规则</button>
+            </div>
+
+            <div id="writeMethodsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MODULE 5: SYSTEM ADMIN ==================== -->
+    <div id="adminModule" class="module-content hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900"><i class="fas fa-cog mr-2 text-gray-600"></i>系统管理</h1>
+                    <p class="text-gray-500 mt-1">会员管理 · 档案管理 · 支付管理 · 系统设置</p>
+                </div>
+            </div>
+
+            <!-- Admin Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-sm font-medium text-gray-600">总会员数</p><p class="text-3xl font-bold text-gray-900 mt-1">1,256</p><p class="text-xs text-green-600 mt-1"><i class="fas fa-arrow-up mr-1"></i>较上月 +45</p></div>
+                        <div class="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center"><i class="fas fa-users text-indigo-600 text-xl"></i></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-sm font-medium text-gray-600">本月收入</p><p class="text-3xl font-bold text-gray-900 mt-1">¥86,500</p><p class="text-xs text-green-600 mt-1"><i class="fas fa-arrow-up mr-1"></i>较上月 +12%</p></div>
+                        <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center"><i class="fas fa-yen-sign text-green-600 text-xl"></i></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-sm font-medium text-gray-600">活跃个案</p><p class="text-3xl font-bold text-gray-900 mt-1">156</p><p class="text-xs text-blue-600 mt-1">干预中</p></div>
+                        <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center"><i class="fas fa-clipboard-list text-blue-600 text-xl"></i></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-sm font-medium text-gray-600">待处理订单</p><p class="text-3xl font-bold text-gray-900 mt-1">8</p><p class="text-xs text-amber-600 mt-1">需要确认</p></div>
+                        <div class="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center"><i class="fas fa-clock text-amber-600 text-xl"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tabs -->
+            <div class="bg-white rounded-xl shadow-sm mb-6">
+                <div class="flex border-b border-gray-200 px-6">
+                    <button onclick="switchAdminTab('members')" id="adminTab-members" class="tab-btn active"><i class="fas fa-users mr-2"></i>会员管理</button>
+                    <button onclick="switchAdminTab('records')" id="adminTab-records" class="tab-btn"><i class="fas fa-folder-open mr-2"></i>档案管理</button>
+                    <button onclick="switchAdminTab('payments')" id="adminTab-payments" class="tab-btn"><i class="fas fa-credit-card mr-2"></i>支付管理</button>
+                    <button onclick="switchAdminTab('settings')" id="adminTab-settings" class="tab-btn"><i class="fas fa-sliders-h mr-2"></i>系统设置</button>
+                </div>
+
+                <!-- Members Tab -->
+                <div id="adminPanel-members" class="p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex space-x-3">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索会员..." class="search-input pl-10 pr-4 py-2 w-64">
+                                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                            </div>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>全部等级</option>
+                                <option>VIP会员</option>
+                                <option>普通会员</option>
+                                <option>试用会员</option>
+                            </select>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>全部状态</option>
+                                <option>活跃</option>
+                                <option>过期</option>
+                                <option>暂停</option>
+                            </select>
+                        </div>
+                        <button onclick="showToast('添加新会员')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"><i class="fas fa-plus mr-2"></i>添加会员</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">会员信息</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">等级</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">有效期</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">干预次数</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">消费金额</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">状态</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center space-x-3">
+                                            <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=Zhang+Mom&bg=F59E0B&color=fff" alt="">
+                                            <div><p class="font-medium text-gray-900">张妈妈</p><p class="text-xs text-gray-500">138****1234</p></div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3"><span class="level-badge bg-purple-100 text-purple-700">VIP会员</span></td>
+                                    <td class="px-4 py-3 text-gray-600">2026-12-31</td>
+                                    <td class="px-4 py-3 text-gray-600">24次</td>
+                                    <td class="px-4 py-3 text-gray-600">¥12,800</td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-green-100 text-green-700">活跃</span></td>
+                                    <td class="px-4 py-3"><button class="text-indigo-600 hover:text-indigo-800 text-sm">详情</button></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center space-x-3">
+                                            <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=Li+Dad&bg=3B82F6&color=fff" alt="">
+                                            <div><p class="font-medium text-gray-900">李爸爸</p><p class="text-xs text-gray-500">139****5678</p></div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3"><span class="level-badge bg-blue-100 text-blue-700">普通会员</span></td>
+                                    <td class="px-4 py-3 text-gray-600">2026-08-15</td>
+                                    <td class="px-4 py-3 text-gray-600">12次</td>
+                                    <td class="px-4 py-3 text-gray-600">¥5,600</td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-green-100 text-green-700">活跃</span></td>
+                                    <td class="px-4 py-3"><button class="text-indigo-600 hover:text-indigo-800 text-sm">详情</button></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center space-x-3">
+                                            <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=Wang+Mom&bg=10B981&color=fff" alt="">
+                                            <div><p class="font-medium text-gray-900">王妈妈</p><p class="text-xs text-gray-500">137****9012</p></div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3"><span class="level-badge bg-amber-100 text-amber-700">试用会员</span></td>
+                                    <td class="px-4 py-3 text-gray-600">2026-06-30</td>
+                                    <td class="px-4 py-3 text-gray-600">3次</td>
+                                    <td class="px-4 py-3 text-gray-600">¥0</td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-amber-100 text-amber-700">即将到期</span></td>
+                                    <td class="px-4 py-3"><button class="text-indigo-600 hover:text-indigo-800 text-sm">详情</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Records Tab -->
+                <div id="adminPanel-records" class="p-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex space-x-3">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索档案..." class="search-input pl-10 pr-4 py-2 w-64">
+                                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                            </div>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>全部模块</option>
+                                <option>听的干预</option>
+                                <option>说的干预</option>
+                                <option>读的干预</option>
+                                <option>写的干预</option>
+                            </select>
+                        </div>
+                        <button onclick="showToast('导出档案')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"><i class="fas fa-download mr-2"></i>导出</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="member-card bg-white border border-gray-200 rounded-xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=Zhang+Xiaoming&bg=3B82F6&color=fff" alt="">
+                                    <div><p class="font-bold text-gray-900">张小明</p><p class="text-xs text-gray-500">8岁3个月 · 男</p></div>
+                                </div>
+                                <span class="method-tag listen">听的干预</span>
+                            </div>
+                            <div class="space-y-2 mb-3">
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">主要问题</span><span class="text-gray-900">听觉辨别困难</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">干预次数</span><span class="text-gray-900">12/24次</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">开始日期</span><span class="text-gray-900">2026-03-15</span></div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 50%"></div>
+                            </div>
+                            <button class="w-full py-2 bg-blue-50 text-blue-600 rounded-lg text-sm hover:bg-blue-100">查看详情</button>
+                        </div>
+                        <div class="member-card bg-white border border-gray-200 rounded-xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=Li+Xiaohong&bg=F59E0B&color=fff" alt="">
+                                    <div><p class="font-bold text-gray-900">李小红</p><p class="text-xs text-gray-500">9岁2个月 · 女</p></div>
+                                </div>
+                                <span class="method-tag read">读的干预</span>
+                            </div>
+                            <div class="space-y-2 mb-3">
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">主要问题</span><span class="text-gray-900">阅读流畅性差</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">干预次数</span><span class="text-gray-900">18/30次</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">开始日期</span><span class="text-gray-900">2026-02-01</span></div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                                <div class="bg-amber-500 h-2 rounded-full" style="width: 60%"></div>
+                            </div>
+                            <button class="w-full py-2 bg-amber-50 text-amber-600 rounded-lg text-sm hover:bg-amber-100">查看详情</button>
+                        </div>
+                        <div class="member-card bg-white border border-gray-200 rounded-xl p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=Wang+Xiaohua&bg=EC4899&color=fff" alt="">
+                                    <div><p class="font-bold text-gray-900">王小华</p><p class="text-xs text-gray-500">6岁8个月 · 男</p></div>
+                                </div>
+                                <span class="method-tag speak">说的干预</span>
+                            </div>
+                            <div class="space-y-2 mb-3">
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">主要问题</span><span class="text-gray-900">发音不清</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">干预次数</span><span class="text-gray-900">8/20次</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-600">开始日期</span><span class="text-gray-900">2026-04-10</span></div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                                <div class="bg-pink-500 h-2 rounded-full" style="width: 40%"></div>
+                            </div>
+                            <button class="w-full py-2 bg-pink-50 text-pink-600 rounded-lg text-sm hover:bg-pink-100">查看详情</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Tab -->
+                <div id="adminPanel-payments" class="p-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex space-x-3">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索订单..." class="search-input pl-10 pr-4 py-2 w-64">
+                                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                            </div>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>全部状态</option>
+                                <option>已支付</option>
+                                <option>待支付</option>
+                                <option>已退款</option>
+                            </select>
+                            <select class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>全部类型</option>
+                                <option>VIP会员费</option>
+                                <option>干预课程费</option>
+                                <option>评估费</option>
+                            </select>
+                        </div>
+                        <button onclick="showToast('导出账单')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"><i class="fas fa-file-export mr-2"></i>导出账单</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">订单号</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">会员</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">类型</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">金额</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">支付方式</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">状态</th>
+                                    <th class="px-4 py-3 text-left font-medium text-gray-600">日期</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-mono text-gray-600">NE20260615001</td>
+                                    <td class="px-4 py-3 text-gray-900">张妈妈</td>
+                                    <td class="px-4 py-3 text-gray-600">VIP会员费(年)</td>
+                                    <td class="px-4 py-3 font-bold text-gray-900">¥9,800</td>
+                                    <td class="px-4 py-3 text-gray-600"><i class="fab fa-weixin text-green-500 mr-1"></i>微信支付</td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-green-100 text-green-700">已支付</span></td>
+                                    <td class="px-4 py-3 text-gray-600">2026-06-15</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-mono text-gray-600">NE20260614002</td>
+                                    <td class="px-4 py-3 text-gray-900">李爸爸</td>
+                                    <td class="px-4 py-3 text-gray-600">干预课程包(20次)</td>
+                                    <td class="px-4 py-3 font-bold text-gray-900">¥6,800</td>
+                                    <td class="px-4 py-3 text-gray-600"><i class="fab fa-alipay text-blue-500 mr-1"></i>支付宝</td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-green-100 text-green-700">已支付</span></td>
+                                    <td class="px-4 py-3 text-gray-600">2026-06-14</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-mono text-gray-600">NE20260613003</td>
+                                    <td class="px-4 py-3 text-gray-900">王妈妈</td>
+                                    <td class="px-4 py-3 text-gray-600">首次评估费</td>
+                                    <td class="px-4 py-3 font-bold text-gray-900">¥500</td>
+                                    <td class="px-4 py-3 text-gray-600"><i class="fab fa-weixin text-green-500 mr-1"></i>微信支付</td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-amber-100 text-amber-700">待确认</span></td>
+                                    <td class="px-4 py-3 text-gray-600">2026-06-13</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-mono text-gray-600">NE20260612004</td>
+                                    <td class="px-4 py-3 text-gray-900">赵爸爸</td>
+                                    <td class="px-4 py-3 text-gray-600">VIP会员费(季)</td>
+                                    <td class="px-4 py-3 font-bold text-gray-900">¥3,200</td>
+                                    <td class="px-4 py-3 text-gray-600"><i class="fas fa-credit-card text-indigo-500 mr-1"></i>银行卡</td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-red-100 text-red-700">已退款</span></td>
+                                    <td class="px-4 py-3 text-gray-600">2026-06-12</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="adminPanel-settings" class="p-6 hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="space-y-6">
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <h3 class="font-bold text-gray-900 mb-4"><i class="fas fa-user-shield mr-2"></i>账户设置</h3>
+                                <div class="space-y-4">
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">机构名称</label><input type="text" value="NeuroEdu康复中心" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">联系人</label><input type="text" value="李治疗师" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label><input type="text" value="13800138000" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <h3 class="font-bold text-gray-900 mb-4"><i class="fas fa-bell mr-2"></i>通知设置</h3>
+                                <div class="space-y-3">
+                                    <label class="flex items-center justify-between"><span class="text-sm text-gray-700">预约提醒</span><input type="checkbox" checked class="rounded text-indigo-600"></label>
+                                    <label class="flex items-center justify-between"><span class="text-sm text-gray-700">干预进度更新</span><input type="checkbox" checked class="rounded text-indigo-600"></label>
+                                    <label class="flex items-center justify-between"><span class="text-sm text-gray-700">会员到期提醒</span><input type="checkbox" checked class="rounded text-indigo-600"></label>
+                                    <label class="flex items-center justify-between"><span class="text-sm text-gray-700">新订单通知</span><input type="checkbox" class="rounded text-indigo-600"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <h3 class="font-bold text-gray-900 mb-4"><i class="fas fa-dollar-sign mr-2"></i>价格设置</h3>
+                                <div class="space-y-4">
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">VIP年费 (¥)</label><input type="number" value="9800" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">VIP季费 (¥)</label><input type="number" value="3200" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">单次干预费 (¥)</label><input type="number" value="450" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 mb-1">评估费 (¥)</label><input type="number" value="500" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-5">
+                                <h3 class="font-bold text-gray-900 mb-4"><i class="fas fa-shield-alt mr-2"></i>安全设置</h3>
+                                <div class="space-y-3">
+                                    <button class="w-full py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 text-left px-4"><i class="fas fa-key mr-2 text-gray-500"></i>修改密码</button>
+                                    <button class="w-full py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 text-left px-4"><i class="fas fa-fingerprint mr-2 text-gray-500"></i>双重验证</button>
+                                    <button class="w-full py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 text-left px-4"><i class="fas fa-history mr-2 text-gray-500"></i>登录历史</button>
+                                    <button class="w-full py-2 border border-red-300 text-red-600 rounded-lg text-sm hover:bg-red-50 text-left px-4"><i class="fas fa-trash-alt mr-2"></i>清除所有数据</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">取消</button>
+                        <button onclick="showToast('设置已保存')" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">保存设置</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODULE: DYNAMIC ASSESSMENT ==================== -->
+    <div id="assessmentModule" class="module-content hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900"><i class="fas fa-chart-line mr-2 text-teal-600"></i>动态评估</h1>
+                    <p class="text-gray-500 mt-1">评估学习潜能 · 中介干预 · 再测验证 · 量化干预效果</p>
+                </div>
+                <div class="flex space-x-3">
+                    <div class="relative">
+                        <input type="text" placeholder="搜索评估个案..." class="search-input pl-10 pr-4 py-2 w-64">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    </div>
+                    <button onclick="showDANewModal()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+                        <i class="fas fa-plus mr-2"></i>新建动态评估
+                    </button>
+                </div>
+            </div>
+
+            <!-- DA Overview Banner -->
+            <div class="bg-gradient-to-r from-teal-500 to-emerald-600 rounded-2xl p-6 mb-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold mb-2">动态评估 (Dynamic Assessment)</h2>
+                        <p class="text-teal-100">评估 → 中介干预 → 再测 → 效果检测 | 量化儿童学习潜能与干预响应度</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="flex space-x-6">
+                            <div class="text-center"><p class="text-3xl font-bold">18</p><p class="text-sm text-teal-200">本月评估</p></div>
+                            <div class="text-center"><p class="text-3xl font-bold">92%</p><p class="text-sm text-teal-200">干预响应率</p></div>
+                            <div class="text-center"><p class="text-3xl font-bold">6</p><p class="text-sm text-teal-200">进行中</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DA Core Process Flow -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 mb-8">
+                <h2 class="text-lg font-bold text-gray-900 mb-6"><i class="fas fa-project-diagram mr-2 text-teal-500"></i>动态评估核心流程</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Step 1: Pre-test -->
+                    <div class="text-center group cursor-pointer" onclick="scrollToDATab('pretest')">
+                        <div class="w-20 h-20 mx-auto pretest-gradient rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-105 transition-transform">
+                            <i class="fas fa-clipboard-check text-white text-2xl"></i>
+                        </div>
+                        <div class="flex items-center justify-center mb-2">
+                            <span class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs font-bold flex items-center justify-center mr-2">1</span>
+                            <h3 class="font-bold text-gray-900">前测评估</h3>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">基线能力测评</p>
+                        <div class="space-y-1 text-left px-2">
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-blue-500 mr-1"></i>独立完成任务</p>
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-blue-500 mr-1"></i>记录基线分数</p>
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-blue-500 mr-1"></i>分析错误模式</p>
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-blue-500 mr-1"></i>识别最近发展区</p>
+                        </div>
+                    </div>
+                    <!-- Arrow -->
+                    <div class="hidden md:flex items-center justify-center pt-10">
+                        <i class="fas fa-arrow-right text-teal-400 text-2xl"></i>
+                    </div>
+                    <!-- Step 2: Mediation -->
+                    <div class="text-center group cursor-pointer" onclick="scrollToDATab('mediation')">
+                        <div class="w-20 h-20 mx-auto mediation-gradient rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-105 transition-transform">
+                            <i class="fas fa-hands-helping text-white text-2xl"></i>
+                        </div>
+                        <div class="flex items-center justify-center mb-2">
+                            <span class="w-6 h-6 bg-teal-100 text-teal-600 rounded-full text-xs font-bold flex items-center justify-center mr-2">2</span>
+                            <h3 class="font-bold text-gray-900">中介干预</h3>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">嵌入式教学支持</p>
+                        <div class="space-y-1 text-left px-2">
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-teal-500 mr-1"></i>提供渐进式提示</p>
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-teal-500 mr-1"></i>教授策略技巧</p>
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-teal-500 mr-1"></i>记录提示层级</p>
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-teal-500 mr-1"></i>评估可塑性</p>
+                        </div>
+                    </div>
+                    <!-- Arrow -->
+                    <div class="hidden md:flex items-center justify-center pt-10">
+                        <i class="fas fa-arrow-right text-purple-400 text-2xl"></i>
+                    </div>
+                    <!-- Step 3 & 4 combined -->
+                    <div class="text-center group cursor-pointer" onclick="scrollToDATab('posttest')">
+                        <div class="w-20 h-20 mx-auto posttest-gradient rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:scale-105 transition-transform">
+                            <i class="fas fa-chart-bar text-white text-2xl"></i>
+                        </div>
+                        <div class="flex items-center justify-center mb-2">
+                            <span class="w-6 h-6 bg-purple-100 text-purple-600 rounded-full text-xs font-bold flex items-center justify-center mr-2">3</span>
+                            <h3 class="font-bold text-gray-900">后测 + 效果检测</h3>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">量化学习潜能</p>
+                        <div class="space-y-1 text-left px-2">
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-purple-500 mr-1"></i>独立再测</p>
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-purple-500 mr-1"></i>计算增益分数</p>
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-purple-500 mr-1"></i>生成效果报告</p>
+                            <p class="text-xs text-gray-600"><i class="fas fa-check text-purple-500 mr-1"></i>制定干预计划</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DA Tabs -->
+            <div class="bg-white rounded-xl shadow-sm mb-6">
+                <div class="flex border-b border-gray-200 px-6">
+                    <button onclick="switchDATab('overview')" id="daTab-overview" class="tab-btn active"><i class="fas fa-list mr-2"></i>评估概览</button>
+                    <button onclick="switchDATab('pretest')" id="daTab-pretest" class="tab-btn"><i class="fas fa-clipboard-check mr-2 text-blue-500"></i>前测评估</button>
+                    <button onclick="switchDATab('mediation')" id="daTab-mediation" class="tab-btn"><i class="fas fa-hands-helping mr-2 text-teal-500"></i>中介干预</button>
+                    <button onclick="switchDATab('posttest')" id="daTab-posttest" class="tab-btn"><i class="fas fa-chart-bar mr-2 text-purple-500"></i>后测与效果</button>
+                    <button onclick="switchDATab('zpd')" id="daTab-zpd" class="tab-btn"><i class="fas fa-bullseye mr-2 text-amber-500"></i>最近发展区</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div id="daPanel-overview" class="p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-bold text-gray-900">动态评估个案列表</h3>
+                        <div class="flex space-x-3">
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>全部状态</option><option>前测中</option><option>中介干预中</option><option>后测中</option><option>已完成</option>
+                            </select>
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>全部模块</option><option>听的评估</option><option>说的评估</option><option>读的评估</option><option>写的评估</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50"><tr>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600">儿童信息</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600">评估模块</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600">当前阶段</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600">前测分数</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600">增益分数</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600">响应度</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600">操作</th>
+                            </tr></thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><div class="flex items-center space-x-3"><img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=Zhang+Xiaoming&bg=3B82F6&color=fff" alt=""><div><p class="font-medium text-gray-900">张小明</p><p class="text-xs text-gray-500">8岁3个月 · 男</p></div></div></td>
+                                    <td class="px-4 py-3"><span class="method-tag listen">听的评估</span></td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-teal-100 text-teal-700"><i class="fas fa-spinner fa-spin mr-1"></i>中介干预中</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-gray-900">45/100</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-gray-400">—</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-gray-400">—</span></td>
+                                    <td class="px-4 py-3"><button onclick="switchDATab('mediation')" class="text-teal-600 hover:text-teal-800 text-sm font-medium">继续评估</button></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><div class="flex items-center space-x-3"><img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=Li+Xiaohong&bg=F59E0B&color=fff" alt=""><div><p class="font-medium text-gray-900">李小红</p><p class="text-xs text-gray-500">9岁2个月 · 女</p></div></div></td>
+                                    <td class="px-4 py-3"><span class="method-tag read">读的评估</span></td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-green-100 text-green-700"><i class="fas fa-check-circle mr-1"></i>已完成</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-gray-900">32/100</span></td>
+                                    <td class="px-4 py-3"><span class="score-badge improved"><i class="fas fa-arrow-up mr-1"></i>+28分</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-green-600">高响应</span></td>
+                                    <td class="px-4 py-3"><button onclick="switchDATab('posttest')" class="text-purple-600 hover:text-purple-800 text-sm font-medium">查看报告</button></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><div class="flex items-center space-x-3"><img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=Wang+Xiaohua&bg=EC4899&color=fff" alt=""><div><p class="font-medium text-gray-900">王小华</p><p class="text-xs text-gray-500">6岁8个月 · 男</p></div></div></td>
+                                    <td class="px-4 py-3"><span class="method-tag speak">说的评估</span></td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-blue-100 text-blue-700"><i class="fas fa-play-circle mr-1"></i>前测中</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-gray-400">进行中</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-gray-400">—</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-gray-400">—</span></td>
+                                    <td class="px-4 py-3"><button onclick="switchDATab('pretest')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">继续前测</button></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><div class="flex items-center space-x-3"><img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=Zhao+Xiaogang&bg=10B981&color=fff" alt=""><div><p class="font-medium text-gray-900">赵小刚</p><p class="text-xs text-gray-500">7岁5个月 · 男</p></div></div></td>
+                                    <td class="px-4 py-3"><span class="method-tag write">写的评估</span></td>
+                                    <td class="px-4 py-3"><span class="payment-status bg-green-100 text-green-700"><i class="fas fa-check-circle mr-1"></i>已完成</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-gray-900">51/100</span></td>
+                                    <td class="px-4 py-3"><span class="score-badge improved"><i class="fas fa-arrow-up mr-1"></i>+12分</span></td>
+                                    <td class="px-4 py-3"><span class="font-bold text-amber-600">中响应</span></td>
+                                    <td class="px-4 py-3"><button onclick="switchDATab('posttest')" class="text-purple-600 hover:text-purple-800 text-sm font-medium">查看报告</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pre-test Tab -->
+                <div id="daPanel-pretest" class="p-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div><h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-clipboard-check mr-2 text-blue-500"></i>前测评估 (Pre-test)</h3><p class="text-sm text-gray-500 mt-1">在无辅助条件下独立完成，建立基线数据</p></div>
+                        <button onclick="showToast('开始新的前测评估')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"><i class="fas fa-play mr-2"></i>开始新前测</button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Assessment Items -->
+                        <div class="lg:col-span-2 space-y-4">
+                            <div class="bg-white border border-gray-200 rounded-xl p-5">
+                                <div class="flex items-center justify-between mb-4"><h4 class="font-bold text-gray-900">听觉辨别前测 · 张小明</h4><span class="text-xs text-gray-400">进行中</span></div>
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-gray-50 rounded-lg">
+                                        <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700">任务1：最小音位对辨别 (/ba/ vs /pa/)</span><span class="text-sm font-bold text-blue-600">8/10</span></div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full" style="width:80%"></div></div>
+                                        <p class="text-xs text-gray-500 mt-1">错误：送气音辨别困难</p>
+                                    </div>
+                                    <div class="p-4 bg-gray-50 rounded-lg">
+                                        <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700">任务2：噪音中辨音</span><span class="text-sm font-bold text-blue-600">5/10</span></div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full" style="width:50%"></div></div>
+                                        <p class="text-xs text-gray-500 mt-1">错误：背景噪音干扰大</p>
+                                    </div>
+                                    <div class="p-4 bg-gray-50 rounded-lg">
+                                        <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700">任务3：四声辨别</span><span class="text-sm font-bold text-blue-600">6/10</span></div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full" style="width:60%"></div></div>
+                                        <p class="text-xs text-gray-500 mt-1">错误：二声和三声混淆</p>
+                                    </div>
+                                    <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                        <div class="flex items-center justify-between"><span class="font-bold text-blue-900">前测总分</span><span class="text-2xl font-bold text-blue-600">45/100</span></div>
+                                        <p class="text-xs text-blue-600 mt-1">基线水平：低于同龄均值1.5个标准差 · 建议进行中介干预</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex space-x-3">
+                                    <button onclick="switchDATab('mediation')" class="flex-1 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm"><i class="fas fa-arrow-right mr-2"></i>进入中介干预</button>
+                                    <button class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">保存记录</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Error Analysis -->
+                        <div class="space-y-4">
+                            <div class="bg-amber-50 rounded-xl p-5 border border-amber-200">
+                                <h4 class="font-bold text-amber-900 mb-3"><i class="fas fa-exclamation-triangle mr-2"></i>错误模式分析</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-start space-x-2"><i class="fas fa-dot-circle text-amber-500 mt-1"></i><p class="text-sm text-amber-800">送气音与不送气音辨别困难（/p/ vs /b/）</p></div>
+                                    <div class="flex items-start space-x-2"><i class="fas fa-dot-circle text-amber-500 mt-1"></i><p class="text-sm text-amber-800">背景噪音中听觉选择性注意弱</p></div>
+                                    <div class="flex items-start space-x-2"><i class="fas fa-dot-circle text-amber-500 mt-1"></i><p class="text-sm text-amber-800">声调辨别能力低于平均水平</p></div>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                                <h4 class="font-bold text-blue-900 mb-3"><i class="fas fa-lightbulb mr-2"></i>最近发展区预估</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-sm"><span class="text-blue-700">当前水平</span><span class="font-bold text-blue-900">45分</span></div>
+                                    <div class="flex justify-between text-sm"><span class="text-blue-700">预估干预后</span><span class="font-bold text-blue-900">65-80分</span></div>
+                                    <div class="flex justify-between text-sm"><span class="text-blue-700">ZPD宽度</span><span class="font-bold text-blue-900">20-35分</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mediation Tab -->
+                <div id="daPanel-mediation" class="p-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div><h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-hands-helping mr-2 text-teal-500"></i>中介干预 (Mediation)</h3><p class="text-sm text-gray-500 mt-1">嵌入式教学支持，记录提示层级与儿童响应</p></div>
+                        <button onclick="showToast('添加新的中介任务')" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm"><i class="fas fa-plus mr-2"></i>添加任务</button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Mediation Flow -->
+                        <div class="lg:col-span-2 space-y-4">
+                            <!-- Mediation Level Scale -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-5">
+                                <h4 class="font-bold text-gray-900 mb-4">提示层级记录 · 听觉辨别训练</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-4 p-3 bg-teal-50 rounded-lg border-l-4 border-teal-500">
+                                        <span class="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                                        <div class="flex-1"><p class="text-sm font-medium text-gray-900">一般性提示</p><p class="text-xs text-gray-500">"仔细听这两个音的区别"</p></div>
+                                        <span class="text-xs font-medium text-teal-600 bg-teal-100 px-2 py-1 rounded">儿童自主完成</span>
+                                    </div>
+                                    <div class="flex items-center space-x-4 p-3 bg-teal-50 rounded-lg border-l-4 border-teal-500">
+                                        <span class="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                                        <div class="flex-1"><p class="text-sm font-medium text-gray-900">特定性提示</p><p class="text-xs text-gray-500">"注意第一个音有没有气流出来"</p></div>
+                                        <span class="text-xs font-medium text-teal-600 bg-teal-100 px-2 py-1 rounded">需少量提示</span>
+                                    </div>
+                                    <div class="flex items-center space-x-4 p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400">
+                                        <span class="w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                                        <div class="flex-1"><p class="text-sm font-medium text-gray-900">示范性提示</p><p class="text-xs text-gray-500">教师示范发音，让儿童观察口型</p></div>
+                                        <span class="text-xs font-medium text-amber-600 bg-amber-100 px-2 py-1 rounded">需要示范</span>
+                                    </div>
+                                    <div class="flex items-center space-x-4 p-3 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+                                        <span class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                                        <div class="flex-1"><p class="text-sm font-medium text-gray-900">直接教学</p><p class="text-xs text-gray-500">解释送气音与不送气音的区别，手把手教学</p></div>
+                                        <span class="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">需要直接教</span>
+                                    </div>
+                                    <div class="flex items-center space-x-4 p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
+                                        <span class="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">5</span>
+                                        <div class="flex-1"><p class="text-sm font-medium text-gray-900">控制性练习</p><p class="text-xs text-gray-500">多次重复练习，逐步减少辅助</p></div>
+                                        <span class="text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded">尚未掌握</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Strategy Teaching -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-5">
+                                <h4 class="font-bold text-gray-900 mb-4">策略教学记录</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="p-4 bg-blue-50 rounded-lg">
+                                        <h5 class="font-medium text-blue-900 mb-2"><i class="fas fa-ear mr-2"></i>听觉聚焦策略</h5>
+                                        <p class="text-sm text-blue-700">教授儿童在听音时用手感受气流差异</p>
+                                        <div class="mt-2 flex items-center"><span class="text-xs text-blue-500 mr-2">掌握程度：</span><div class="flex-1 bg-blue-200 rounded-full h-1.5"><div class="bg-blue-500 h-1.5 rounded-full" style="width:75%"></div></div><span class="text-xs text-blue-700 ml-2">75%</span></div>
+                                    </div>
+                                    <div class="p-4 bg-purple-50 rounded-lg">
+                                        <h5 class="font-medium text-purple-900 mb-2"><i class="fas fa-search mr-2"></i>自我检查策略</h5>
+                                        <p class="text-sm text-purple-700">引导儿童听完后自己说出答案的依据</p>
+                                        <div class="mt-2 flex items-center"><span class="text-xs text-purple-500 mr-2">掌握程度：</span><div class="flex-1 bg-purple-200 rounded-full h-1.5"><div class="bg-purple-500 h-1.5 rounded-full" style="width:60%"></div></div><span class="text-xs text-purple-700 ml-2">60%</span></div>
+                                    </div>
+                                    <div class="p-4 bg-green-50 rounded-lg">
+                                        <h5 class="font-medium text-green-900 mb-2"><i class="fas fa-volume-up mr-2"></i>口语复述策略</h5>
+                                        <p class="text-sm text-green-700">要求儿童听后复述听到的内容</p>
+                                        <div class="mt-2 flex items-center"><span class="text-xs text-green-500 mr-2">掌握程度：</span><div class="flex-1 bg-green-200 rounded-full h-1.5"><div class="bg-green-500 h-1.5 rounded-full" style="width:80%"></div></div><span class="text-xs text-green-700 ml-2">80%</span></div>
+                                    </div>
+                                    <div class="p-4 bg-amber-50 rounded-lg">
+                                        <h5 class="font-medium text-amber-900 mb-2"><i class="fas fa-layer-group mr-2"></i>分层聆听策略</h5>
+                                        <p class="text-sm text-amber-700">从安静环境逐步过渡到嘈杂环境</p>
+                                        <div class="mt-2 flex items-center"><span class="text-xs text-amber-500 mr-2">掌握程度：</span><div class="flex-1 bg-amber-200 rounded-full h-1.5"><div class="bg-amber-500 h-1.5 rounded-full" style="width:45%"></div></div><span class="text-xs text-amber-700 ml-2">45%</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Mediation Summary -->
+                        <div class="space-y-4">
+                            <div class="bg-teal-50 rounded-xl p-5 border border-teal-200">
+                                <h4 class="font-bold text-teal-900 mb-3"><i class="fas fa-user-check mr-2"></i>中介干预摘要</h4>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between text-sm"><span class="text-teal-700">干预时长</span><span class="font-bold text-teal-900">45分钟</span></div>
+                                    <div class="flex justify-between text-sm"><span class="text-teal-700">提示层级范围</span><span class="font-bold text-teal-900">1-4级</span></div>
+                                    <div class="flex justify-between text-sm"><span class="text-teal-700">平均提示层级</span><span class="font-bold text-teal-900">2.3级</span></div>
+                                    <div class="flex justify-between text-sm"><span class="text-teal-700">策略掌握数</span><span class="font-bold text-teal-900">3/4</span></div>
+                                    <div class="flex justify-between text-sm"><span class="text-teal-700">可塑性指数</span><span class="font-bold text-teal-900">0.72 (高)</span></div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl p-5 border border-gray-200">
+                                <h4 class="font-bold text-gray-900 mb-3">评估者笔记</h4>
+                                <textarea class="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none" placeholder="记录儿童在中介过程中的表现、反应、特殊行为..."></textarea>
+                                <button onclick="showToast('笔记已保存')" class="mt-2 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 w-full">保存笔记</button>
+                            </div>
+                            <button onclick="switchDATab('posttest')" class="w-full py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 text-sm font-medium"><i class="fas fa-arrow-right mr-2"></i>进入后测评估</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post-test & Results Tab -->
+                <div id="daPanel-posttest" class="p-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div><h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-chart-bar mr-2 text-purple-500"></i>后测与效果检测</h3><p class="text-sm text-gray-500 mt-1">独立再测，量化干预效果与学习能力</p></div>
+                        <div class="flex space-x-3">
+                            <button onclick="showToast('生成评估报告')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"><i class="fas fa-file-alt mr-2"></i>生成报告</button>
+                            <button onclick="showToast('导出PDF')" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-download mr-2"></i>导出</button>
+                        </div>
+                    </div>
+
+                    <!-- Results for Li Xiaohong -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Score Comparison -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5">
+                            <h4 class="font-bold text-gray-900 mb-4">分数对比 · 李小红 (读的能力)</h4>
+                            <div class="space-y-5">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700">阅读流畅性</span><div class="flex items-center space-x-3"><span class="text-sm text-gray-500">前测 <strong class="text-gray-900">32</strong></span><i class="fas fa-arrow-right text-gray-300"></i><span class="text-sm text-gray-500">后测 <strong class="text-purple-600">60</strong></span><span class="score-badge improved">+28</span></div></div>
+                                    <div class="flex items-center space-x-2"><div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden"><div class="flex h-full"><div class="bg-blue-500 h-full" style="width:32%"></div><div class="bg-purple-500 h-full" style="width:28%"></div></div></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700">阅读理解</span><div class="flex items-center space-x-3"><span class="text-sm text-gray-500">前测 <strong class="text-gray-900">28</strong></span><i class="fas fa-arrow-right text-gray-300"></i><span class="text-sm text-gray-500">后测 <strong class="text-purple-600">55</strong></span><span class="score-badge improved">+27</span></div></div>
+                                    <div class="flex items-center space-x-2"><div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden"><div class="flex h-full"><div class="bg-blue-500 h-full" style="width:28%"></div><div class="bg-purple-500 h-full" style="width:27%"></div></div></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700">识字量</span><div class="flex items-center space-x-3"><span class="text-sm text-gray-500">前测 <strong class="text-gray-900">45</strong></span><i class="fas fa-arrow-right text-gray-300"></i><span class="text-sm text-gray-500">后测 <strong class="text-purple-600">62</strong></span><span class="score-badge improved">+17</span></div></div>
+                                    <div class="flex items-center space-x-2"><div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden"><div class="flex h-full"><div class="bg-blue-500 h-full" style="width:45%"></div><div class="bg-purple-500 h-full" style="width:17%"></div></div></div></div>
+                                </div>
+                                <div class="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                                    <div class="flex items-center justify-between"><span class="font-bold text-purple-900">总分</span><div class="flex items-center space-x-3"><span class="text-lg font-bold text-gray-500">35</span><i class="fas fa-arrow-right text-purple-400"></i><span class="text-lg font-bold text-purple-600">59</span><span class="score-badge improved">+24分 (69%增益)</span></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Learning Potential Analysis -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5">
+                            <h4 class="font-bold text-gray-900 mb-4">学习潜能分析</h4>
+                            <div class="space-y-4">
+                                <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                    <div class="flex items-center justify-between mb-2"><h5 class="font-medium text-green-900">干预响应度</h5><span class="text-2xl font-bold text-green-600">高</span></div>
+                                    <div class="w-full bg-green-200 rounded-full h-2"><div class="bg-green-500 h-2 rounded-full" style="width:85%"></div></div>
+                                    <p class="text-xs text-green-700 mt-2">增益分数 > 20分，提示学习潜能良好，对干预响应积极</p>
+                                </div>
+                                <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                    <h5 class="font-medium text-blue-900 mb-2">可塑性指数 (Modifiability Index)</h5>
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-16 h-16 relative"><svg class="progress-ring w-16 h-16" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" stroke="#dbeafe" stroke-width="10" fill="none"/><circle cx="60" cy="60" r="50" stroke="#3b82f6" stroke-width="10" fill="none" stroke-dasharray="314" stroke-dashoffset="94" stroke-linecap="round"/></svg><span class="absolute inset-0 flex items-center justify-center text-sm font-bold text-blue-600">0.70</span></div>
+                                        <div class="flex-1"><p class="text-sm text-blue-700">中-高可塑性</p><p class="text-xs text-blue-600">预期经过系统干预后可达同龄均值水平</p></div>
+                                    </div>
+                                </div>
+                                <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                                    <h5 class="font-medium text-amber-900 mb-2">提示效率 (Hint Efficiency)</h5>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between text-sm"><span class="text-amber-700">所需提示层级</span><span class="font-bold text-amber-900">1-3级（低-中）</span></div>
+                                        <div class="flex justify-between text-sm"><span class="text-amber-700">策略内化速度</span><span class="font-bold text-amber-900">快</span></div>
+                                        <div class="flex justify-between text-sm"><span class="text-amber-700">迁移表现</span><span class="font-bold text-amber-900">良好</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendation -->
+                    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-200">
+                        <h4 class="font-bold text-purple-900 mb-3"><i class="fas fa-clipboard-list mr-2"></i>干预建议</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-white rounded-lg p-4">
+                                <h5 class="font-medium text-gray-900 mb-2"><i class="fas fa-check-circle text-green-500 mr-2"></i>推荐干预</h5>
+                                <p class="text-sm text-gray-600">分级阅读训练 + 阅读流畅性训练，每周2-3次，每次30-45分钟</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-4">
+                                <h5 class="font-medium text-gray-900 mb-2"><i class="fas fa-clock text-blue-500 mr-2"></i>预期周期</h5>
+                                <p class="text-sm text-gray-600">3-4个月（24-32次训练）可达到同龄平均水平</p>
+                            </div>
+                            <div class="bg-white rounded-lg p-4">
+                                <h5 class="font-medium text-gray-900 mb-2"><i class="fas fa-bullseye text-purple-500 mr-2"></i>目标设定</h5>
+                                <p class="text-sm text-gray-600">第1个月：提升15分 · 第2个月：提升25分 · 第3个月：达到均值</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex space-x-3">
+                            <button onclick="showToast('已转为正式干预计划')" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"><i class="fas fa-file-medical mr-2"></i>转为干预计划</button>
+                            <button onclick="showToast('已分享给家长')" class="px-6 py-2 border border-purple-300 text-purple-700 rounded-lg hover:bg-purple-100 text-sm"><i class="fas fa-share-alt mr-2"></i>分享给家长</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ZPD Tab -->
+                <div id="daPanel-zpd" class="p-6 hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div><h3 class="font-bold text-gray-900 text-lg"><i class="fas fa-bullseye mr-2 text-amber-500"></i>最近发展区 (Zone of Proximal Development)</h3><p class="text-sm text-gray-500 mt-1">可视化儿童当前能力与潜在能力之间的差距</p></div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- ZPD Visualization -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-5">
+                            <h4 class="font-bold text-gray-900 mb-4">最近发展区图谱</h4>
+                            <div class="space-y-6">
+                                <!-- Listen -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700"><i class="fas fa-ear-listen text-blue-500 mr-2"></i>听的能力</span><span class="text-xs text-gray-400">ZPD: 25分</span></div>
+                                    <div class="h-8 bg-gray-100 rounded-full overflow-hidden relative flex items-center">
+                                        <div class="absolute left-0 top-0 bottom-0 bg-blue-500 rounded-full flex items-center justify-center text-xs text-white font-medium z-10" style="width:45%">当前 45分</div>
+                                        <div class="absolute left-0 top-0 bottom-0 bg-blue-300 rounded-full" style="width:70%"></div>
+                                        <div class="absolute right-3 text-xs text-gray-500">潜在 70分</div>
+                                    </div>
+                                </div>
+                                <!-- Speak -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700"><i class="fas fa-comment-dots text-pink-500 mr-2"></i>说的能力</span><span class="text-xs text-gray-400">ZPD: 15分</span></div>
+                                    <div class="h-8 bg-gray-100 rounded-full overflow-hidden relative flex items-center">
+                                        <div class="absolute left-0 top-0 bottom-0 bg-pink-500 rounded-full flex items-center justify-center text-xs text-white font-medium z-10" style="width:55%">当前 55分</div>
+                                        <div class="absolute left-0 top-0 bottom-0 bg-pink-300 rounded-full" style="width:70%"></div>
+                                        <div class="absolute right-3 text-xs text-gray-500">潜在 70分</div>
+                                    </div>
+                                </div>
+                                <!-- Read -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700"><i class="fas fa-book-reader text-amber-500 mr-2"></i>读的能力</span><span class="text-xs text-gray-400">ZPD: 35分</span></div>
+                                    <div class="h-8 bg-gray-100 rounded-full overflow-hidden relative flex items-center">
+                                        <div class="absolute left-0 top-0 bottom-0 bg-amber-500 rounded-full flex items-center justify-center text-xs text-white font-medium z-10" style="width:35%">当前 35分</div>
+                                        <div class="absolute left-0 top-0 bottom-0 bg-amber-300 rounded-full" style="width:70%"></div>
+                                        <div class="absolute right-3 text-xs text-gray-500">潜在 70分</div>
+                                    </div>
+                                </div>
+                                <!-- Write -->
+                                <div>
+                                    <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium text-gray-700"><i class="fas fa-pen-fancy text-green-500 mr-2"></i>写的能力</span><span class="text-xs text-gray-400">ZPD: 20分</span></div>
+                                    <div class="h-8 bg-gray-100 rounded-full overflow-hidden relative flex items-center">
+                                        <div class="absolute left-0 top-0 bottom-0 bg-green-500 rounded-full flex items-center justify-center text-xs text-white font-medium z-10" style="width:50%">当前 50分</div>
+                                        <div class="absolute left-0 top-0 bottom-0 bg-green-300 rounded-full" style="width:70%"></div>
+                                        <div class="absolute right-3 text-xs text-gray-500">潜在 70分</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-center space-x-6 text-xs">
+                                <div class="flex items-center"><div class="w-3 h-3 bg-blue-500 rounded mr-1"></div><span>当前水平</span></div>
+                                <div class="flex items-center"><div class="w-3 h-3 bg-blue-300 rounded mr-1"></div><span>ZPD范围</span></div>
+                                <div class="flex items-center"><div class="w-3 h-3 bg-gray-100 border border-gray-300 rounded mr-1"></div><span>同龄均值</span></div>
+                            </div>
+                        </div>
+                        <!-- ZPD Summary -->
+                        <div class="space-y-4">
+                            <div class="bg-amber-50 rounded-xl p-5 border border-amber-200">
+                                <h4 class="font-bold text-amber-900 mb-3">最大发展区 · 读的能力</h4>
+                                <p class="text-sm text-amber-700 mb-3">当前35分 → 潜在70分，ZPD宽度35分，是优先干预领域</p>
+                                <div class="w-full bg-amber-200 rounded-full h-3"><div class="bg-amber-500 h-3 rounded-full" style="width:70%"></div></div>
+                            </div>
+                            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                                <h4 class="font-bold text-blue-900 mb-3">ZPD解读</h4>
+                                <div class="space-y-2 text-sm text-blue-700">
+                                    <p><strong>宽ZPD（>25分）：</strong>学习潜能大，对干预响应可能较好，建议优先干预</p>
+                                    <p><strong>窄ZPD（<15分）：</strong>能力已接近天花板，可能需要调整目标或方法</p>
+                                    <p><strong>高前测+窄ZPD：</strong>能力较好，轻度支持即可</p>
+                                    <p><strong>低前测+宽ZPD：</strong>有较大提升空间，系统干预效果显著</p>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl p-5 border border-gray-200">
+                                <h4 class="font-bold text-gray-900 mb-3">干预优先级排序</h4>
+                                <div class="space-y-2">
+                                    <div class="flex items-center space-x-3"><span class="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span><span class="text-sm text-gray-700">读的能力（ZPD 35分）</span></div>
+                                    <div class="flex items-center space-x-3"><span class="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span><span class="text-sm text-gray-700">听的能力（ZPD 25分）</span></div>
+                                    <div class="flex items-center space-x-3"><span class="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span><span class="text-sm text-gray-700">写的能力（ZPD 20分）</span></div>
+                                    <div class="flex items-center space-x-3"><span class="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span><span class="text-sm text-gray-700">说的能力（ZPD 15分）</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== COURSE STUDIO MODULE ==================== -->
+    <div id="studioModule" class="module-content hidden">
+        <div class="flex h-screen" style="height: calc(100vh - 64px);">
+            <!-- Studio Sidebar -->
+            <div class="w-60 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+                <div class="p-4 border-b border-gray-200">
+                    <div class="flex items-center space-x-2 mb-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-video text-white text-sm"></i>
+                        </div>
+                        <span class="font-bold text-gray-900 text-sm">课程工坊</span>
+                    </div>
+                    <button onclick="showToast('新建课程项目')" class="w-full py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm hover:shadow-lg">
+                        <i class="fas fa-plus mr-1"></i>新建课程
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-2">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2">工作区</p>
+                    <div class="space-y-1">
+                        <button onclick="switchStudioTab('projects')" id="studioNav-projects" class="studio-nav w-full text-left px-3 py-2 rounded-lg text-sm font-medium bg-purple-50 text-purple-700 flex items-center space-x-2">
+                            <i class="fas fa-folder-open w-5"></i><span>课程项目</span>
+                        </button>
+                        <button onclick="switchStudioTab('editor')" id="studioNav-editor" class="studio-nav w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                            <i class="fas fa-edit w-5"></i><span>课件编辑器</span>
+                        </button>
+                        <button onclick="switchStudioTab('video')" id="studioNav-video" class="studio-nav w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                            <i class="fas fa-film w-5"></i><span>视频剪辑</span>
+                        </button>
+                        <button onclick="switchStudioTab('assets')" id="studioNav-assets" class="studio-nav w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                            <i class="fas fa-photo-video w-5"></i><span>素材库</span>
+                        </button>
+                        <button onclick="switchStudioTab('templates')" id="studioNav-templates" class="studio-nav w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                            <i class="fas fa-layer-group w-5"></i><span>模板中心</span>
+                        </button>
+                    </div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2 mt-4">最近项目</p>
+                    <div class="space-y-1">
+                        <button class="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center">
+                            <i class="fas fa-ear-listen text-blue-500 w-5"></i><span class="truncate flex-1">听觉辨别训练</span>
+                            <span class="status-badge draft">草稿</span>
+                        </button>
+                        <button class="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center">
+                            <i class="fas fa-comment-dots text-pink-500 w-5"></i><span class="truncate flex-1">语音模仿课件</span>
+                            <span class="status-badge published">已发布</span>
+                        </button>
+                        <button class="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center">
+                            <i class="fas fa-book-open text-amber-500 w-5"></i><span class="truncate flex-1">阅读流畅训练</span>
+                            <span class="status-badge review">审核中</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Studio Main Content -->
+            <div class="flex-1 overflow-y-auto bg-gray-50" id="studioMainContent">
+                <!-- Projects Panel -->
+                <div id="studioPanel-projects" class="p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div><h1 class="text-2xl font-bold text-gray-900">课程项目</h1><p class="text-gray-500 mt-1">管理您的多媒体干预课程</p></div>
+                        <div class="flex space-x-3">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索课程..." class="search-input pl-10 pr-4 py-2 w-56">
+                                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                            </div>
+                            <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option>全部状态</option><option>草稿</option><option>审核中</option><option>已发布</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover cursor-pointer" onclick="switchStudioTab('editor')">
+                            <div class="aspect-video bg-gradient-to-br from-blue-100 to-indigo-200 relative">
+                                <div class="absolute inset-0 flex items-center justify-center"><i class="fas fa-ear-listen text-blue-500 text-4xl"></i></div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                                    <div class="flex items-center space-x-3 text-white text-xs">
+                                        <span><i class="fas fa-video mr-1"></i>3</span><span><i class="fas fa-image mr-1"></i>8</span><span><i class="fas fa-puzzle-piece mr-1"></i>5</span>
+                                    </div>
+                                </div>
+                                <span class="status-badge draft absolute top-3 right-3">草稿</span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-bold text-gray-900 mb-1">听觉辨别训练课程</h3>
+                                <p class="text-xs text-gray-500">针对相似音辨别困难儿童</p>
+                                <div class="flex items-center justify-between mt-3"><span class="text-xs text-gray-400">2小时前</span><button class="text-gray-400 hover:text-purple-600"><i class="fas fa-edit"></i></button></div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover cursor-pointer" onclick="switchStudioTab('editor')">
+                            <div class="aspect-video bg-gradient-to-br from-pink-100 to-rose-200 relative">
+                                <div class="absolute inset-0 flex items-center justify-center"><i class="fas fa-comment-dots text-pink-500 text-4xl"></i></div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                                    <div class="flex items-center space-x-3 text-white text-xs">
+                                        <span><i class="fas fa-video mr-1"></i>2</span><span><i class="fas fa-image mr-1"></i>12</span><span><i class="fas fa-puzzle-piece mr-1"></i>8</span>
+                                    </div>
+                                </div>
+                                <span class="status-badge published absolute top-3 right-3">已发布</span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-bold text-gray-900 mb-1">语音模仿训练课件</h3>
+                                <p class="text-xs text-gray-500">g/k音矫正训练</p>
+                                <div class="flex items-center justify-between mt-3"><span class="text-xs text-gray-400">昨天</span><button class="text-gray-400 hover:text-purple-600"><i class="fas fa-edit"></i></button></div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden card-hover cursor-pointer" onclick="switchStudioTab('editor')">
+                            <div class="aspect-video bg-gradient-to-br from-amber-100 to-orange-200 relative">
+                                <div class="absolute inset-0 flex items-center justify-center"><i class="fas fa-book-open text-amber-500 text-4xl"></i></div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                                    <div class="flex items-center space-x-3 text-white text-xs">
+                                        <span><i class="fas fa-video mr-1"></i>1</span><span><i class="fas fa-image mr-1"></i>15</span><span><i class="fas fa-puzzle-piece mr-1"></i>6</span>
+                                    </div>
+                                </div>
+                                <span class="status-badge review absolute top-3 right-3">审核中</span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-bold text-gray-900 mb-1">阅读流畅性训练课件</h3>
+                                <p class="text-xs text-gray-500">分级阅读Level 3</p>
+                                <div class="flex items-center justify-between mt-3"><span class="text-xs text-gray-400">3天前</span><button class="text-gray-400 hover:text-purple-600"><i class="fas fa-edit"></i></button></div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border-2 border-dashed border-gray-300 flex items-center justify-center min-h-[260px] cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" onclick="showToast('新建课程')">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-plus text-purple-500 text-2xl"></i></div>
+                                <p class="text-sm font-medium text-gray-700">创建新课程</p>
+                                <p class="text-xs text-gray-500 mt-1">从模板或空白开始</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editor Panel -->
+                <div id="studioPanel-editor" class="hidden">
+                    <div class="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between sticky top-0 z-30">
+                        <div class="flex items-center space-x-4">
+                            <button onclick="switchStudioTab('projects')" class="text-gray-500 hover:text-gray-700"><i class="fas fa-arrow-left"></i></button>
+                            <div><h2 class="text-sm font-bold text-gray-900">听觉辨别训练课程</h2><p class="text-xs text-gray-500">上次保存：2分钟前</p></div>
+                            <span class="status-badge draft">草稿</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="showToast('课程已保存')" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-save mr-1"></i>保存</button>
+                            <button onclick="showToast('预览模式')" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-eye mr-1"></i>预览</button>
+                            <button onclick="showToast('课程已发布')" class="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm"><i class="fas fa-upload mr-1"></i>发布</button>
+                        </div>
+                    </div>
+                    <div class="flex" style="height: calc(100vh - 112px);">
+                        <div class="w-48 bg-gray-100 border-r border-gray-200 overflow-y-auto p-3">
+                            <div class="flex items-center justify-between mb-3"><span class="text-xs font-semibold text-gray-500">幻灯片 (5)</span><button class="text-purple-600 text-xs"><i class="fas fa-plus"></i></button></div>
+                            <div class="space-y-2">
+                                <div class="slide-thumbnail active" onclick="selectStudioSlide(this)"><div class="h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50"><span class="text-xs text-gray-400">封面</span></div></div>
+                                <div class="slide-thumbnail" onclick="selectStudioSlide(this)"><div class="h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50"><span class="text-xs text-gray-400">视频</span></div></div>
+                                <div class="slide-thumbnail" onclick="selectStudioSlide(this)"><div class="h-full flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50"><span class="text-xs text-gray-400">互动</span></div></div>
+                                <div class="slide-thumbnail" onclick="selectStudioSlide(this)"><div class="h-full flex items-center justify-center bg-gray-50"><span class="text-xs text-gray-400">+ 新增</span></div></div>
+                            </div>
+                        </div>
+                        <div class="flex-1 bg-gray-200 overflow-auto p-6">
+                            <div class="bg-white rounded-xl shadow-lg mx-auto" style="min-height: 500px; max-width: 800px; padding: 40px;">
+                                <div class="text-center mb-8">
+                                    <h1 class="text-3xl font-bold text-gray-900 mb-2">听觉辨别训练</h1>
+                                    <p class="text-gray-500">适合年龄：5-10岁 | 训练时长：30分钟</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-6 mb-6">
+                                    <div class="bg-blue-50 rounded-xl p-4 text-center cursor-pointer hover:bg-blue-100 transition-all">
+                                        <i class="fas fa-play-circle text-blue-500 text-3xl mb-2"></i>
+                                        <p class="text-sm font-medium text-gray-700">播放示范音频</p>
+                                    </div>
+                                    <div class="bg-purple-50 rounded-xl p-4 text-center cursor-pointer hover:bg-purple-100 transition-all">
+                                        <i class="fas fa-volume-up text-purple-500 text-3xl mb-2"></i>
+                                        <p class="text-sm font-medium text-gray-700">辨别练习</p>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 rounded-xl p-4">
+                                    <h3 class="font-bold text-gray-900 mb-2">训练目标</h3>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        <li><i class="fas fa-check text-green-500 mr-2"></i>能正确辨别 /ba/ 和 /pa/ 的发音差异</li>
+                                        <li><i class="fas fa-check text-green-500 mr-2"></i>在背景噪音中识别目标音</li>
+                                        <li><i class="fas fa-check text-green-500 mr-2"></i>准确复述听到的音节序列</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-64 bg-white border-l border-gray-200 p-4 overflow-y-auto">
+                            <h3 class="font-bold text-gray-900 mb-4">组件库</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-400 mb-2">基础组件</p>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button class="p-2 bg-gray-50 rounded-lg text-center hover:bg-purple-50 text-xs"><i class="fas fa-font text-purple-500 mb-1 block"></i>文本</button>
+                                        <button class="p-2 bg-gray-50 rounded-lg text-center hover:bg-purple-50 text-xs"><i class="fas fa-image text-purple-500 mb-1 block"></i>图片</button>
+                                        <button class="p-2 bg-gray-50 rounded-lg text-center hover:bg-purple-50 text-xs"><i class="fas fa-video text-purple-500 mb-1 block"></i>视频</button>
+                                        <button class="p-2 bg-gray-50 rounded-lg text-center hover:bg-purple-50 text-xs"><i class="fas fa-music text-purple-500 mb-1 block"></i>音频</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-400 mb-2">互动组件</p>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button class="p-2 bg-gray-50 rounded-lg text-center hover:bg-pink-50 text-xs"><i class="fas fa-question-circle text-pink-500 mb-1 block"></i>测验</button>
+                                        <button class="p-2 bg-gray-50 rounded-lg text-center hover:bg-pink-50 text-xs"><i class="fas fa-hand-pointer text-pink-500 mb-1 block"></i>拖拽</button>
+                                        <button class="p-2 bg-gray-50 rounded-lg text-center hover:bg-pink-50 text-xs"><i class="fas fa-microphone text-pink-500 mb-1 block"></i>录音</button>
+                                        <button class="p-2 bg-gray-50 rounded-lg text-center hover:bg-pink-50 text-xs"><i class="fas fa-magic text-pink-500 mb-1 block"></i>动画</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Panel -->
+                <div id="studioPanel-video" class="hidden">
+                    <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <button onclick="switchStudioTab('projects')" class="text-gray-500 hover:text-gray-700"><i class="fas fa-arrow-left"></i></button>
+                            <div><h2 class="text-sm font-bold text-gray-900">视频剪辑器</h2><p class="text-xs text-gray-500">听觉辨别训练 - 视频编辑</p></div>
+                        </div>
+                        <button onclick="showToast('视频导出成功')" class="px-4 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm"><i class="fas fa-download mr-1"></i>导出</button>
+                    </div>
+                    <div class="flex flex-1" style="height: calc(100vh - 116px);">
+                        <div class="w-64 bg-gray-50 border-r border-gray-200 p-3">
+                            <p class="text-xs font-semibold text-gray-400 mb-2">素材</p>
+                            <div class="space-y-2">
+                                <div class="bg-white rounded-lg p-2 border border-gray-200 cursor-pointer hover:border-purple-300">
+                                    <div class="aspect-video bg-gradient-to-br from-blue-100 to-indigo-200 rounded flex items-center justify-center mb-1"><i class="fas fa-play text-blue-400"></i></div>
+                                    <p class="text-xs truncate">音节拆分示范</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-2 border border-gray-200 cursor-pointer hover:border-purple-300">
+                                    <div class="aspect-video bg-gradient-to-br from-purple-100 to-pink-200 rounded flex items-center justify-center mb-1"><i class="fas fa-play text-purple-400"></i></div>
+                                    <p class="text-xs truncate">音素辨别游戏</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-1 flex flex-col">
+                            <div class="flex-1 bg-gray-900 flex items-center justify-center p-8">
+                                <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl w-full max-w-2xl aspect-video flex items-center justify-center relative">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-play-circle text-5xl mb-4 opacity-60"></i>
+                                        <p>点击预览视频</p>
+                                        <p class="text-sm text-gray-400 mt-1">总时长: 08:45</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="h-48 bg-gray-800 border-t border-gray-700 p-4">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <button class="text-gray-400 hover:text-white"><i class="fas fa-cut"></i></button>
+                                    <button class="text-gray-400 hover:text-white"><i class="fas fa-copy"></i></button>
+                                    <button class="text-gray-400 hover:text-white"><i class="fas fa-trash"></i></button>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center space-x-2"><span class="text-gray-400 text-xs w-12 text-right">视频</span><div class="timeline-track flex-1"><div class="timeline-clip" style="left:0;width:200px;background:linear-gradient(135deg,#6366f1,#8b5cf6)"><span class="text-white text-xs px-2">片段1</span></div></div></div>
+                                    <div class="flex items-center space-x-2"><span class="text-gray-400 text-xs w-12 text-right">音频</span><div class="timeline-track flex-1"><div class="timeline-clip" style="left:0;width:300px;background:linear-gradient(135deg,#10b981,#059669)"><span class="text-white text-xs px-2">背景音乐</span></div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assets Panel -->
+                <div id="studioPanel-assets" class="p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div><h1 class="text-2xl font-bold text-gray-900">多媒体素材库</h1><p class="text-gray-500 mt-1">管理视频、图片、音频、文档等教学素材</p></div>
+                        <button onclick="showToast('上传素材')" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm"><i class="fas fa-cloud-upload-alt mr-2"></i>上传素材</button>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button class="px-4 py-2 rounded-full text-sm font-medium bg-purple-600 text-white">全部</button>
+                        <button class="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"><i class="fas fa-video mr-1"></i>视频</button>
+                        <button class="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"><i class="fas fa-image mr-1"></i>图片</button>
+                        <button class="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"><i class="fas fa-music mr-1"></i>音频</button>
+                        <button class="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"><i class="fas fa-file-alt mr-1"></i>文档</button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-purple-300 cursor-pointer">
+                            <div class="aspect-video bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center"><i class="fas fa-play-circle text-blue-400 text-3xl"></i></div>
+                            <div class="p-2"><p class="text-xs font-medium truncate">音节拆分示范</p><span class="asset-tag video">视频</span></div>
+                        </div>
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-purple-300 cursor-pointer">
+                            <div class="aspect-video bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center"><i class="fas fa-brain text-amber-400 text-3xl"></i></div>
+                            <div class="p-2"><p class="text-xs font-medium truncate">听觉处理示意图</p><span class="asset-tag image">图片</span></div>
+                        </div>
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-purple-300 cursor-pointer">
+                            <div class="aspect-video bg-gradient-to-br from-green-100 to-teal-200 flex items-center justify-center"><i class="fas fa-music text-green-400 text-3xl"></i></div>
+                            <div class="p-2"><p class="text-xs font-medium truncate">背景音乐素材</p><span class="asset-tag audio">音频</span></div>
+                        </div>
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-purple-300 cursor-pointer">
+                            <div class="aspect-video bg-gradient-to-br from-indigo-100 to-blue-200 flex items-center justify-center"><i class="fas fa-file-pdf text-indigo-400 text-3xl"></i></div>
+                            <div class="p-2"><p class="text-xs font-medium truncate">干预教案模板</p><span class="asset-tag document">文档</span></div>
+                        </div>
+                        <div class="bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 min-h-[140px]" onclick="showToast('上传素材')">
+                            <div class="text-center"><i class="fas fa-cloud-upload-alt text-gray-400 text-2xl mb-1"></i><p class="text-xs text-gray-500">上传新素材</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Templates Panel -->
+                <div id="studioPanel-templates" class="p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div><h1 class="text-2xl font-bold text-gray-900">课件模板中心</h1><p class="text-gray-500 mt-1">选择专业模板快速创建干预课程</p></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-lg transition-all border border-gray-200">
+                            <div class="aspect-video bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center"><i class="fas fa-ear-listen text-blue-500 text-5xl"></i></div>
+                            <div class="p-4"><h3 class="font-bold text-gray-900">听觉训练模板</h3><p class="text-sm text-gray-500 mt-1">辨别·记忆·理解·专注</p><button class="mt-3 px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">使用模板</button></div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-lg transition-all border border-gray-200">
+                            <div class="aspect-video bg-gradient-to-br from-pink-100 to-rose-200 flex items-center justify-center"><i class="fas fa-comment-dots text-pink-500 text-5xl"></i></div>
+                            <div class="p-4"><h3 class="font-bold text-gray-900">口语训练模板</h3><p class="text-sm text-gray-500 mt-1">发音·词汇·语法·语用</p><button class="mt-3 px-4 py-1.5 bg-pink-600 text-white text-sm rounded-lg hover:bg-pink-700">使用模板</button></div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-lg transition-all border border-gray-200">
+                            <div class="aspect-video bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center"><i class="fas fa-book-reader text-amber-500 text-5xl"></i></div>
+                            <div class="p-4"><h3 class="font-bold text-gray-900">阅读训练模板</h3><p class="text-sm text-gray-500 mt-1">识字·流畅·理解策略</p><button class="mt-3 px-4 py-1.5 bg-amber-600 text-white text-sm rounded-lg hover:bg-amber-700">使用模板</button></div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-lg transition-all border border-gray-200">
+                            <div class="aspect-video bg-gradient-to-br from-green-100 to-teal-200 flex items-center justify-center"><i class="fas fa-pen-fancy text-green-500 text-5xl"></i></div>
+                            <div class="p-4"><h3 class="font-bold text-gray-900">书写训练模板</h3><p class="text-sm text-gray-500 mt-1">笔画·抄写·听写·写作</p><button class="mt-3 px-4 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">使用模板</button></div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-lg transition-all border border-gray-200 lg:col-span-2">
+                            <div class="aspect-video bg-gradient-to-br from-purple-100 to-indigo-200 flex items-center justify-center"><i class="fas fa-layer-group text-purple-500 text-5xl"></i></div>
+                            <div class="p-4"><h3 class="font-bold text-gray-900">综合干预模板</h3><p class="text-sm text-gray-500 mt-1">听说读写综合训练课程模板</p><button class="mt-3 px-4 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700">使用模板</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Method Detail Modal -->
+<div id="methodDetailModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 modal-enter method-detail-panel">
+        <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+            <div class="flex items-center space-x-3">
+                <span id="modalMethodTag" class="method-tag listen"></span>
+                <h2 id="modalMethodTitle" class="text-xl font-bold text-gray-900"></h2>
+            </div>
+            <button onclick="closeMethodModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <div class="p-6" id="modalMethodContent"></div>
+    </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const listenMethods = [
+    { id: 1, name: "听觉辨别训练", category: "discrimination", principle: "通过系统化的声音辨别练习，强化大脑对语音特征的识别能力，提升听觉敏感度。", course: "课程分为三个阶段：基础声音辨别（动物叫声、乐器声）、语音辨别（相似音对比）、复杂语音辨别（噪音中辨音）。", steps: ["准备不同声音素材", "儿童闭眼聆听", "辨别声音来源或特征", "逐步增加难度", "记录正确率"], difficulty: "儿童容易混淆相似音，需要大量重复练习；注意力分散会影响训练效果。", examples: ["辨别'ba'和'pa'的发音差异", "在背景音乐中识别特定乐器声", "辨别不同人的脚步声", "识别不同动物的叫声", "辨别普通话四个声调的差异"] },
+    { id: 2, name: "听觉记忆训练", category: "memory", principle: "通过序列记忆和重复练习，增强听觉信息的短期保持和提取能力。", course: "从简单数字序列开始，逐步过渡到词语序列、句子序列，最终到故事复述。", steps: ["呈现听觉刺激", "要求即时或延时重复", "逐步增加序列长度", "提供反馈和强化"], difficulty: "记忆容量有限，儿童容易遗忘中间信息；需要维持高度注意力。", examples: ["复述3-5个数字序列", "记忆并复述一组词语（如：苹果、书本、汽车）", "听句子后回答细节问题", "复述简短故事的主要内容", "执行多步骤指令"] },
+    { id: 3, name: "听觉排序训练", category: "comprehension", principle: "训练儿童按时间或逻辑顺序组织和排列听觉信息的能力。", course: "使用故事排序、事件排序、步骤排序等活动，配合视觉辅助工具。", steps: ["呈现打乱顺序的故事片段", "引导儿童聆听并理解每个片段", "按逻辑重新排序", "验证正确性"], difficulty: "需要理解因果关系和时间序列；对工作记忆要求较高。", examples: ["将'早上起床后'的步骤排序", "听故事片段后按正确顺序排列", "按照大小顺序排列听到的动物叫声", "将做蛋糕的步骤按正确顺序排列", "按时间顺序排列一天的活动"] },
+    { id: 4, name: "听觉理解训练", category: "comprehension", principle: "通过上下文理解和推理练习，提升儿童对语言深层含义的理解能力。", course: "从简单指令理解开始，逐步过渡到复杂句子、段落和篇章理解。", steps: ["呈现语言材料", "提出问题或指令", "引导理解关键词和上下文", "反馈和解释"], difficulty: "抽象词汇和复杂句法结构理解困难；需要背景知识支持。", examples: ["理解并执行'把红色的书放在绿色的盒子旁边'", "听故事后回答'为什么'类问题", "理解比喻性语言", "推断故事中人物的情感和动机", "理解多义词在特定语境中的含义"] },
+    { id: 5, name: "听觉专注力训练", category: "attention", principle: "通过选择性注意和持续性注意练习，提升儿童在复杂听觉环境中的专注能力。", course: "使用噪音背景下的听辨任务、持续性聆听任务、注意力转移任务。", steps: ["创建不同难度的听觉环境", "设定明确任务目标", "逐步增加干扰因素", "监测专注时长和准确率"], difficulty: "注意力容易分散；需要长期训练才能见效。", examples: ["在有背景电视声音时聆听指令", "听一段故事后回答特定问题", "在嘈杂环境中识别目标声音", "持续聆听并记录特定词语出现次数", "从多种声音中分辨出老师的声音"] },
+    { id: 6, name: "多感官听觉整合训练", category: "discrimination", principle: "结合视觉、触觉、动觉等多种感官通道，强化听觉信息的编码和记忆。", course: "设计多感官结合的活动，如边听边做动作、边听边看图片、边听边触摸。", steps: ["选择目标听觉刺激", "设计配套感官活动", "同步呈现多模态信息", "强化跨通道联结"], difficulty: "需要协调多种感官输入；部分儿童可能感觉过载。", examples: ["听字母发音时同时触摸字母形状", "听音乐节奏时同步拍手或踏步", "听故事时配合图片或手势", "听指令时同时执行动作", "听声音时同时观看声源位置"] },
+    { id: 7, name: "语音意识训练", category: "discrimination", principle: "通过音素识别、音节拆分等练习，提升对语音结构的敏感度。", course: "从音节层面开始，逐步过渡到onset-rime和音素层面。", steps: ["教授音节概念", "练习音节拆分和合并", "识别首音和尾韵", "操作音素（删除、替换、添加）"], difficulty: "抽象语音概念理解困难；需要大量练习才能自动化。", examples: ["将'苹果'拆分为'苹'和'果'两个音节", "识别'花'和'画'的首音相同", "删除'草莓'的'草'剩下'莓'", "将'太阳'的第一个音节替换为'月'变成'月亮'", "判断两个词是否押韵"] },
+    { id: 8, name: "听觉追踪训练", category: "attention", principle: "训练儿童追踪长时间、连续的听觉信息并理解其内容的能力。", course: "使用长度递增的听觉材料，从短句到长段落，配合理解问题。", steps: ["选择适当长度的材料", "设定理解目标", "分段聆听并理解", "整体回顾和总结"], difficulty: "信息量大时容易遗漏关键内容；需要维持长时间注意力。", examples: ["听一段30秒的对话后回答主要内容", "追踪故事中的多条线索", "听指令完成多步骤任务", "理解长篇故事的情节发展", "追踪课堂讲解中的关键信息"] },
+    { id: 9, name: "听觉反馈训练", category: "metacognition", principle: "通过即时反馈机制，帮助儿童监控和调节自己的听觉理解过程。", course: "使用录音设备、自我评分表、同伴互评等方式提供反馈。", steps: ["设定明确的理解目标", "儿童自我监控理解程度", "提供即时反馈", "调整策略重新聆听"], difficulty: "儿童自我监控能力有限；需要成人辅助。", examples: ["听完后自我评分理解程度", "使用'理解检查卡'自我评估", "同伴互相提问检验理解", "录音后回听自我纠错", "使用手势信号表示理解程度"] },
+    { id: 10, name: "听觉联想训练", category: "comprehension", principle: "通过建立听觉刺激与已有知识经验的联结，提升理解深度和记忆效果。", course: "使用语义联想、情境联想、情感联想等多种联想策略。", steps: ["呈现听觉刺激", "引导儿童激活相关知识", "建立新旧信息联结", "巩固和扩展联想网络"], difficulty: "知识储备不足时难以建立有效联结；容易建立错误联想。", examples: ["听到'春天'联想到花开、暖和、燕子", "听到'学校'联想到老师、同学、课本", "听到'生病'联想到医院、吃药、休息", "听故事时联想相似经历", "听新词时联想已知同义词"] },
+    { id: 11, name: "听觉工作记忆训练", category: "memory", principle: "通过同时存储和处理听觉信息的练习，提升工作记忆容量和效率。", course: "使用N-back任务、数字倒背、运算记忆等工作记忆训练任务。", steps: ["呈现需要同时记忆和处理的信息", "要求执行特定认知操作", "逐步增加负荷", "监测表现"], difficulty: "认知负荷大，容易产生挫败感；需要循序渐进。", examples: ["听一串数字后倒序复述", "听一组词语后按类别分类回忆", "听算式后报出结果", "听句子后判断正误", "听故事后按时间顺序回忆事件"] },
+    { id: 12, name: "听觉情景理解训练", category: "comprehension", principle: "在真实或模拟的生活情景中训练听觉理解能力，提升实际应用能力。", course: "创设购物、问路、餐厅点餐等日常生活情景。", steps: ["创设真实情景", "角色扮演中使用听觉信息", "解决实际问题", "反思和总结"], difficulty: "真实情景复杂多变；需要泛化到不同场景。", examples: ["在模拟超市中听懂购物清单", "在餐厅情景中理解点餐对话", "在医院情景中听懂医嘱", "在学校情景中听懂老师指令", "在公共交通情景中听懂广播信息"] }
+];
+
+const speakMethods = [
+    { id: 1, name: "发音器官运动训练", category: "articulation", principle: "通过系统化的口部肌肉运动练习，增强发音器官的灵活性和协调性。", course: "包括唇部运动（噘嘴、咧嘴）、舌部运动（伸舌、卷舌）、下颌运动（张口、闭口）。", steps: ["评估口部肌肉功能", "设计针对性运动方案", "示范和辅助完成", "逐步增加难度和速度"], difficulty: "部分儿童口部肌肉力量不足或协调性差；需要长期坚持。", examples: ["练习噘嘴发'u'音，咧嘴发'i'音", "舌头左右摆动触碰嘴角", "上下牙齿轻叩练习", "吹泡泡锻炼唇部力量", "用吸管喝水锻炼吸吮能力"] },
+    { id: 2, name: "语音模仿训练", category: "articulation", principle: "通过模仿正确的语音模型，建立准确的语音表征和发音习惯。", course: "从单音节模仿开始，逐步过渡到词语、句子、对话。", steps: ["呈现标准语音模型", "儿童观察口型", "尝试模仿发音", "反馈和纠正"], difficulty: "某些音素发音位置难以掌握；容易形成错误习惯。", examples: ["模仿老师发'ba、pa、ma'", "跟读词语'爸爸、妈妈、哥哥'", "模仿句子'我要喝水'", "跟读儿歌《小白兔》", "模仿动物的叫声"] },
+    { id: 3, name: "最小对立对训练", category: "articulation", principle: "通过对比只有单一音素差异的词对，帮助儿童区分和正确发音相似音。", course: "选择目标儿童混淆的音素，设计最小对立对进行训练。", steps: ["确定易混淆音素", "设计对立词对", "听辨和发音练习", "泛化到句子中"], difficulty: "相似音区分困难；需要大量重复练习。", examples: ["练习'十四'和'事实'的区分", "区分'蓝色'和'男色'", "练习'买'和'卖'的发音", "区分'兔子'和'肚子'", "练习'开花'和'开发'"] },
+    { id: 4, name: "句子扩展训练", category: "grammar", principle: "通过逐步增加句子成分，提升儿童构造复杂句子的能力。", course: "从简单句开始，逐步添加定语、状语、补语等成分。", steps: ["给出简单句框架", "引导添加修饰成分", "练习完整表达", "创造性扩展"], difficulty: "语法知识有限；句子过长容易出错。", examples: ["从'我吃苹果'扩展到'我开心地吃了一个大大的红苹果'", "给'小狗跑'添加状语变成'小狗在草地上快乐地跑'", "将'这是书'扩展为'这是一本有趣的图画书'", "给'妈妈做饭'添加时间状语", "练习使用连词连接两个简单句"] },
+    { id: 5, name: "叙事能力训练", category: "narrative", principle: "通过结构化的故事讲述练习，提升儿童组织语言和连贯表达的能力。", course: "使用故事山、五指法、时间线等工具辅助叙事。", steps: ["选择或创作故事主题", "规划故事结构", "分段讲述", "完整叙述"], difficulty: "逻辑组织能力有限；容易遗漏重要信息。", examples: ["用五指法讲述一天的经历", "根据图片编故事", "讲述一次难忘的经历", "复述喜欢的动画片情节", "按照时间顺序讲述做手工的过程"] },
+    { id: 6, name: "词汇扩展训练", category: "vocabulary", principle: "通过系统化的词汇教学，扩大儿童的表达性词汇量。", course: "按主题分类教授词汇，使用多感官方法和语境化教学。", steps: ["确定目标词汇", "多方式呈现词义", "在语境中练习使用", "巩固和复习"], difficulty: "抽象词汇理解困难；容易遗忘。", examples: ["学习情绪词汇：开心、难过、生气、害怕、惊讶", "学习描述性词汇：大的、小的、红的、圆的、软的", "学习动作词汇：跑、跳、爬、飞、游", "学习关系词汇：因为、所以、但是、而且", "学习时间词汇：首先、然后、最后、突然"] },
+    { id: 7, name: "语用能力训练", category: "pragmatic", principle: "在真实社交情境中训练恰当使用语言的能力。", course: "设计不同社交场景，练习问候、请求、道歉、感谢等言语行为。", steps: ["设定社交场景", "角色扮演", "练习恰当表达", "反馈和修正"], difficulty: "社交规则复杂多变；需要理解他人意图。", examples: ["练习礼貌请求：'请给我那本书，好吗？'", "学习如何道歉：'对不起，我不是故意的'", "练习表达感谢：'谢谢你帮助我'", "学习如何拒绝：'我现在不想玩，等会可以吗？'", "练习打电话的用语"] },
+    { id: 8, name: "流畅性训练", category: "fluency", principle: "通过呼吸控制和节奏练习，提升口语表达的流畅度。", course: "包括腹式呼吸训练、慢速说话练习、节奏训练等。", steps: ["学习正确呼吸方式", "练习慢速清晰说话", "逐步加快速度", "在日常中应用"], difficulty: "紧张时容易回退；需要长期练习。", examples: ["练习腹式呼吸：把手放在肚子上感受起伏", "慢速朗读儿歌", "用节拍器控制说话速度", "练习一口气说完一个短句", "录音后自我评估流畅度"] },
+    { id: 9, name: "语法结构训练", category: "grammar", principle: "通过系统化的语法教学，提升儿童使用正确句法结构的能力。", course: "从简单句法结构开始，逐步过渡到复杂结构。", steps: ["评估现有语法水平", "确定目标结构", "示范和练习", "在对话中应用"], difficulty: "抽象语法规则难以理解；容易受方言影响。", examples: ["练习使用'把'字句", "学习被动句", "练习使用连词：'虽然…但是…'", "学习疑问句结构", "练习使用否定词"] },
+    { id: 10, name: "描述性表达训练", category: "vocabulary", principle: "通过详细描述事物特征，提升儿童精确表达和丰富词汇使用的能力。", course: "使用五感描述法、特征描述法等策略。", steps: ["选择描述对象", "从不同角度观察", "组织描述语言", "完整表达"], difficulty: "观察不够细致；词汇量限制描述丰富度。", examples: ["描述一个苹果的颜色、形状、大小、味道", "描述自己房间里的物品", "描述一位熟悉的人的外貌", "描述一种动物的生活习性", "描述天气的变化"] }
+];
+
+const readMethods = [
+    { id: 1, name: "拼音基础训练", category: "literacy", principle: "通过系统化的拼音教学，建立音形对应关系，为独立阅读奠定基础。", course: "按照声母、韵母、声调的顺序，循序渐进地教授拼音规则。", steps: ["学习单个字母发音", "组合拼读", "练习带声调的音节", "在词语中应用"], difficulty: "声母韵母组合规则复杂；声调区分困难。", examples: ["学习声母'b、p、m、f'的发音和书写", "练习单韵母'a、o、e'的四声", "拼读'ba、pa、ma'等音节", "练习三拼音节'gua、kua、hua'", "用拼音写简单的词语"] },
+    { id: 2, name: "汉字字形分析训练", category: "literacy", principle: "通过分析汉字的构字规律（象形、指事、会意、形声），提升识字效率。", course: "按照造字法分类教学，利用字理识字。", steps: ["介绍造字法概念", "分析典型例字", "归类识字", "应用和巩固"], difficulty: "抽象字理理解困难；部分字理已演变。", examples: ["学习象形字：日、月、山、水", "分析形声字：河（氵+可）、湖（氵+胡）", "了解会意字：明（日+月）、休（人+木）", "认识指事字：上、下、本、末", "用部首归类法记忆一组汉字"] },
+    { id: 3, name: "部首归类识字法", category: "literacy", principle: "通过部首系统归类汉字，建立汉字网络，提升记忆效率。", course: "按照常用部首分类，集中学习同部首汉字。", steps: ["学习部首名称和意义", "收集同部首汉字", "理解字义联系", "对比记忆"], difficulty: "部首数量多；部分部首意义不明显。", examples: ["学习'氵'部：江、河、湖、海", "学习'木'部：树、林、森、材", "学习'扌'部：打、推、拉、提", "学习'口'部：吃、喝、叫、唱", "制作部首归类卡片"] },
+    { id: 4, name: "阅读流畅性训练", category: "fluency", principle: "通过反复朗读和速度练习，提升阅读的准确性和速度。", course: "使用计时阅读、反复朗读、伙伴阅读等方法。", steps: ["选择适当难度的材料", "初次朗读计时", "练习和纠正", "再次朗读比较"], difficulty: "追求速度可能影响理解；容易回读。", examples: ["用计时器记录1分钟读多少字", "同一篇短文读三遍，比较速度", "和伙伴一起朗读，互相纠正", "跟着录音朗读，模仿语速", "每周记录阅读速度变化"] },
+    { id: 5, name: "阅读理解策略训练", category: "comprehension", principle: "教授和练习多种阅读理解策略，提升深层理解能力。", course: "教授预测、提问、澄清、总结等策略。", steps: ["教授具体策略", "示范如何使用", "在指导下练习", "独立应用"], difficulty: "策略需要有意使用；容易忘记应用。", examples: ["读前预测故事内容", "读中提问'为什么'", "遇到不懂的词联系上下文", "读后用一句话总结", "画思维导图梳理内容"] },
+    { id: 6, name: "语境识字法", category: "literacy", principle: "在具体语言环境中学习汉字，通过上下文理解字义和用法。", course: "选择适合的文章，在阅读和讨论中学习生字。", steps: ["阅读包含目标字的短文", "根据上下文猜测字义", "验证和学习", "在相似语境中应用"], difficulty: "上下文线索不足时难以推测；容易猜错。", examples: ["在阅读故事中学习'勇敢'的'勇'", "通过上下文理解'高兴'的'兴'", "在儿歌中学习'快乐'的'乐'", "通过对话理解'谢谢'的用法", "在说明文中学习专业词汇"] },
+    { id: 7, name: "多感官识字法", category: "literacy", principle: "结合视觉、听觉、触觉、动觉等多种感官通道，强化汉字记忆。", course: "设计看、听、写、摸、做等多感官参与的活动。", steps: ["看字形结构", "听发音和解释", "书空或描红", "用材料拼字", "在语境中使用"], difficulty: "活动准备复杂；部分儿童感觉过敏。", examples: ["在沙盘上用手指写字", "用橡皮泥捏出汉字形状", "一边写一边大声读", "用身体摆出汉字形状", "用彩色笔描红并说出笔画名称"] },
+    { id: 8, name: "字族文识字法", category: "literacy", principle: "将具有共同部件或读音特点的汉字组成字族，通过歌谣或短文集中学习。", course: "编写包含同族汉字的韵文或儿歌。", steps: ["确定字族", "编写或选择字族文", "朗读和理解", "归纳识字规律"], difficulty: "字族文编写需要技巧；部分字族规律不明显。", examples: ["学习'青'字族：清、晴、睛、情、请", "学习'包'字族：抱、跑、泡、炮、饱", "学习'令'字族：领、零、岭、铃、龄", "用儿歌记忆字族字", "制作字族思维导图"] },
+    { id: 9, name: "分级阅读训练", category: "fluency", principle: "根据阅读能力选择适当难度的材料，循序渐进提升阅读水平。", course: "使用分级读物系统，从简单到复杂逐步过渡。", steps: ["评估阅读水平", "选择合适级别", "阅读和理解", "通过评估后升级"], difficulty: "评估可能不准确；容易选择过难或过易的材料。", examples: ["阅读一级读物（每页1-2句话）", "过渡到二级读物（简单段落）", "阅读三级读物（完整短文）", "挑战四级读物（章节书）", "根据兴趣选择同级别不同主题"] },
+    { id: 10, name: "阅读提问法", category: "strategy", principle: "通过自我提问促进主动阅读，加深理解。", course: "教授不同类型的问题（事实性、推理性、评价性）。", steps: ["读前提出问题", "读中寻找答案", "读后讨论问题", "提出新问题"], difficulty: "提问需要思维参与；容易只读不问。", examples: ["读前问：这个故事可能讲什么？", "读中问：主人公为什么这样做？", "读后问：你同意主人公的做法吗？", "问自己：我最感兴趣的部分是什么？", "问作者：如果我是作者会怎么写？"] }
+];
+
+const writeMethods = [
+    { id: 1, name: "笔画笔顺基础训练", category: "handwriting", principle: "通过系统化的笔画和笔顺练习，建立正确的书写基础。", course: "从基本笔画开始，逐步过渡到偏旁部首和完整汉字。", steps: ["学习基本笔画名称和写法", "在田字格中描红", "独立书写笔画", "按照正确笔顺书写汉字"], difficulty: "笔画顺序容易混淆；手部精细动作控制不足。", examples: ["练习横、竖、撇、捺、点五种基本笔画", "在田字格中描红'一、二、三'", "按正确笔顺书写'日、月、水、火'", "练习偏旁部首的书写", "使用沙盘进行大肌肉书写练习"] },
+    { id: 2, name: "间架结构训练", category: "handwriting", principle: "通过理解汉字的结构规律，提升书写的美观度和规范性。", course: "学习左右结构、上下结构、包围结构等常见结构类型。", steps: ["认识汉字结构类型", "分析范字结构比例", "在田字格中练习", "独立书写并对比"], difficulty: "空间感知能力不足；难以把握部件比例。", examples: ["学习左右结构的'林、明、好'", "学习上下结构的'草、花、星'", "学习包围结构的'国、同、这'", "分析范字各部件的比例关系", "使用结构格辅助书写"] },
+    { id: 3, name: "描红与临摹训练", category: "handwriting", principle: "通过描红和临摹名家字帖，培养正确的书写习惯和审美。", course: "选择适合年龄的字帖，从描红到临摹逐步过渡。", steps: ["选择合适字帖", "描红练习", "对临练习", "背临练习"], difficulty: "容易形成依赖；独立书写时质量下降。", examples: ["使用描红本练习基本汉字", "临摹楷书字帖中的简单字", "对临'永'字八法", "背临学过的汉字", "使用透明纸蒙写"] },
+    { id: 4, name: "听写训练", category: "dictation", principle: "通过听写练习，强化语音到字形的转换能力。", course: "从听写单个字开始，逐步过渡到词语、句子和短文。", steps: ["教师朗读", "学生听辨", "书写", "检查纠正"], difficulty: "语音和字形对应困难；同音字容易混淆。", examples: ["听写10个学过的生字", "听写常用词语", "听写简单句子", "听写短文段落", "进行同伴互听互写"] },
+    { id: 5, name: "抄写训练", category: "copying", principle: "通过抄写练习，强化视觉到动觉的转换，提升书写自动化水平。", course: "从抄写单个字开始，逐步过渡到词语、句子和段落。", steps: ["观察范字", "记住字形", "书写", "对比检查"], difficulty: "容易抄错或漏字；注意力易分散。", examples: ["抄写课文中的新学生字", "抄写优美句子", "抄写完整段落", "限时抄写练习", "抄写后背诵检查"] },
+    { id: 6, name: "书写速度训练", category: "handwriting", principle: "通过限时书写练习，在保持质量的前提下提升书写速度。", course: "设定合理的时间目标，逐步提高书写效率。", steps: ["测定基线速度", "设定合理目标", "限时练习", "记录进步"], difficulty: "提速可能影响书写质量；容易焦虑。", examples: ["1分钟内抄写尽可能多的汉字", "使用计时器进行书写比赛", "逐步提高抄写速度目标", "在保证质量的前提下限时书写", "记录每周书写速度变化"] },
+    { id: 7, name: "看图写话训练", category: "composition", principle: "通过观察图片并组织语言，培养初步的写作能力。", course: "从单幅图开始，逐步过渡到多幅图和连环画。", steps: ["观察图片", "确定主题", "组织句子", "连成短文"], difficulty: "想象力不足；句子组织能力有限。", examples: ["根据单幅图写3-5句话", "根据多幅图编小故事", "给图片添加对话", "描述图片中人物的动作和表情", "为图片写标题和说明"] },
+    { id: 8, name: "日记写作训练", category: "composition", principle: "通过日记写作，培养日常记录和表达的习惯。", course: "从一句话日记开始，逐步过渡到完整段落。", steps: ["确定写作主题", "回忆和整理", "口头表述", "书面记录"], difficulty: "缺乏写作素材；不知从何写起。", examples: ["写一句话记录今天最开心的事", "写3-5句话描述今天做的事", "写一段描写天气和心情的文字", "记录一次有趣的活动", "写读后感或观后感"] },
+    { id: 9, name: "仿写训练", category: "composition", principle: "通过模仿优秀范文的结构和语言，学习写作技巧。", course: "选择适合年龄的优秀范文，进行结构和语言的仿写。", steps: ["阅读范文", "分析结构特点", "确定仿写内容", "完成仿写"], difficulty: "容易照搬原文；创造性不足。", examples: ["仿照范文写'我的妈妈'", "仿照排比句写句子", "仿照范文结构写记叙文", "替换范文中的词语写新文章", "仿照诗歌格式创作"] },
+    { id: 10, name: "创意写作训练", category: "composition", principle: "通过创意写作活动，激发写作兴趣和想象力。", course: "设计续写、改写、想象写作等创意活动。", steps: ["确定写作情境", "头脑风暴", "列提纲", "完成写作"], difficulty: "想象力受限；难以组织完整故事。", examples: ["续写故事结尾", "改写故事人物视角", "编写幻想故事", "创作小诗或儿歌", "编写小剧本"] }
+];
+
+// ===================== FUNCTIONS =====================
+function showToast(message) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast bg-gray-800 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2';
+    toast.innerHTML = `<i class="fas fa-check-circle text-green-400"></i><span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function switchAuth(type) {
+    document.getElementById('loginForm').classList.toggle('hidden', type !== 'login');
+    document.getElementById('registerForm').classList.toggle('hidden', type !== 'register');
+    document.getElementById('loginTab').className = 'flex-1 py-2 rounded-md text-sm font-medium transition-all ' + (type === 'login' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500');
+    document.getElementById('registerTab').className = 'flex-1 py-2 rounded-md text-sm font-medium transition-all ' + (type === 'register' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500');
+}
+
+function login(role) {
+    document.getElementById('authModal').classList.add('hidden');
+    document.getElementById('mainApp').classList.remove('hidden');
+    const names = { therapist: '李治疗师', teacher: '王老师', parent: '张妈妈' };
+    const roles = { therapist: '言语语言治疗师 · 高级', teacher: '特殊教育教师 · 一级', parent: '家长 · VIP会员' };
+    document.getElementById('userName').textContent = names[role] || '李治疗师';
+    document.getElementById('userRole').textContent = roles[role] || '言语语言治疗师';
+    document.getElementById('dashUserName').textContent = names[role] || '李治疗师';
+    showToast('登录成功');
+}
+
+function logout() {
+    document.getElementById('mainApp').classList.add('hidden');
+    document.getElementById('authModal').classList.remove('hidden');
+}
+
+function switchModule(module) {
+    document.querySelectorAll('.module-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const moduleMap = {
+        dashboard: 'dashboardModule', listen: 'listenModule', speak: 'speakModule',
+        read: 'readModule', write: 'writeModule', studio: 'studioModule',
+        assessment: 'assessmentModule', admin: 'adminModule'
+    };
+    const navMap = {
+        dashboard: 'nav-dashboard', listen: 'nav-listen', speak: 'nav-speak',
+        read: 'nav-read', write: 'nav-write', studio: 'nav-studio',
+        assessment: 'nav-assessment', admin: 'nav-admin'
+    };
+    const target = document.getElementById(moduleMap[module]);
+    if (target) { target.classList.remove('hidden'); target.classList.add('fade-in'); }
+    const nav = document.getElementById(navMap[module]);
+    if (nav) nav.classList.add('active');
+
+    if (module === 'listen') renderMethods('listen', listenMethods);
+    if (module === 'speak') renderMethods('speak', speakMethods);
+    if (module === 'read') renderMethods('read', readMethods);
+    if (module === 'write') renderMethods('write', writeMethods);
+}
+
+function renderMethods(type, methods) {
+    const grid = document.getElementById(type + 'MethodsGrid');
+    if (!grid) return;
+    const colors = { listen: 'blue', speak: 'pink', read: 'amber', write: 'green' };
+    const labels = { listen: '听的干预', speak: '说的干预', read: '读的干预', write: '写的干预' };
+    const color = colors[type];
+    grid.innerHTML = methods.map((m, i) => `
+        <div class="method-card bg-white rounded-xl border border-gray-200 p-5 cursor-pointer" onclick="openMethodDetail('${type}', ${i})" data-category="${m.category}">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-${color}-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-${type === 'listen' ? 'ear-listen' : type === 'speak' ? 'comment-dots' : type === 'read' ? 'book-open' : 'pen-fancy'} text-${color}-500"></i>
+                    </div>
+                    <div><span class="text-xs text-gray-400">方法${m.id}</span><h3 class="font-bold text-gray-900 text-sm">${m.name}</h3></div>
+                </div>
+                <span class="method-tag ${type}">${labels[type]}</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-3 line-clamp-2">${m.principle}</p>
+            <div class="flex items-center justify-between text-xs text-gray-400">
+                <span><i class="fas fa-list-ul mr-1"></i>${m.steps.length}个步骤</span>
+                <span><i class="fas fa-lightbulb mr-1"></i>${m.examples.length}个示例</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function openMethodDetail(type, index) {
+    const methods = { listen: listenMethods, speak: speakMethods, read: readMethods, write: writeMethods }[type];
+    const m = methods[index];
+    const labels = { listen: '听的干预', speak: '说的干预', read: '读的干预', write: '写的干预' };
+    document.getElementById('modalMethodTag').className = 'method-tag ' + type;
+    document.getElementById('modalMethodTag').textContent = labels[type];
+    document.getElementById('modalMethodTitle').textContent = m.name;
+    document.getElementById('modalMethodContent').innerHTML = `
+        <div class="space-y-6">
+            <div><h3 class="font-bold text-gray-900 mb-2"><i class="fas fa-flask mr-2 text-indigo-500"></i>原理</h3><p class="text-gray-600 text-sm leading-relaxed">${m.principle}</p></div>
+            <div><h3 class="font-bold text-gray-900 mb-2"><i class="fas fa-book mr-2 text-purple-500"></i>课程设计</h3><p class="text-gray-600 text-sm leading-relaxed">${m.course}</p></div>
+            <div><h3 class="font-bold text-gray-900 mb-2"><i class="fas fa-list-ol mr-2 text-blue-500"></i>操作流程</h3><div class="space-y-2">${m.steps.map((s, i) => `<div class="flex items-start space-x-3"><span class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">${i+1}</span><p class="text-sm text-gray-600">${s}</p></div>`).join('')}</div></div>
+            <div><h3 class="font-bold text-gray-900 mb-2"><i class="fas fa-exclamation-triangle mr-2 text-amber-500"></i>重难点</h3><p class="text-gray-600 text-sm">${m.difficulty}</p></div>
+            <div><h3 class="font-bold text-gray-900 mb-2"><i class="fas fa-lightbulb mr-2 text-green-500"></i>示例</h3><div class="grid grid-cols-1 gap-2">${m.examples.map(e => `<div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i>${e}</div>`).join('')}</div></div>
+            <div class="flex space-x-3 pt-4 border-t border-gray-200">
+                <button onclick="showToast('已添加到干预计划')" class="flex-1 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"><i class="fas fa-plus mr-2"></i>添加到干预计划</button>
+                <button onclick="showToast('已收藏')" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"><i class="fas fa-star text-amber-400"></i></button>
+            </div>
+        </div>
+    `;
+    document.getElementById('methodDetailModal').classList.remove('hidden');
+}
+
+function closeMethodModal() {
+    document.getElementById('methodDetailModal').classList.add('hidden');
+}
+
+function filterMethods(type, keyword) {
+    const allMethods = { listen: listenMethods, speak: speakMethods, read: readMethods, write: writeMethods };
+    const filtered = allMethods[type].filter(m => m.name.includes(keyword) || m.principle.includes(keyword));
+    renderMethods(type, filtered);
+}
+
+function filterListenCategory(cat) {
+    document.querySelectorAll('.listen-filter').forEach(b => { b.classList.remove('bg-blue-600', 'text-white'); b.classList.add('bg-gray-100', 'text-gray-700'); });
+    event.target.classList.remove('bg-gray-100', 'text-gray-700'); event.target.classList.add('bg-blue-600', 'text-white');
+    const filtered = cat === 'all' ? listenMethods : listenMethods.filter(m => m.category === cat);
+    renderMethods('listen', filtered);
+}
+function filterSpeakCategory(cat) {
+    document.querySelectorAll('.speak-filter').forEach(b => { b.classList.remove('bg-pink-600', 'text-white'); b.classList.add('bg-gray-100', 'text-gray-700'); });
+    event.target.classList.remove('bg-gray-100', 'text-gray-700'); event.target.classList.add('bg-pink-600', 'text-white');
+    renderMethods('speak', cat === 'all' ? speakMethods : speakMethods.filter(m => m.category === cat));
+}
+function filterReadCategory(cat) {
+    document.querySelectorAll('.read-filter').forEach(b => { b.classList.remove('bg-amber-600', 'text-white'); b.classList.add('bg-gray-100', 'text-gray-700'); });
+    event.target.classList.remove('bg-gray-100', 'text-gray-700'); event.target.classList.add('bg-amber-600', 'text-white');
+    renderMethods('read', cat === 'all' ? readMethods : readMethods.filter(m => m.category === cat));
+}
+function filterWriteCategory(cat) {
+    document.querySelectorAll('.write-filter').forEach(b => { b.classList.remove('bg-green-600', 'text-white'); b.classList.add('bg-gray-100', 'text-gray-700'); });
+    event.target.classList.remove('bg-gray-100', 'text-gray-700'); event.target.classList.add('bg-green-600', 'text-white');
+    renderMethods('write', cat === 'all' ? writeMethods : writeMethods.filter(m => m.category === cat));
+}
+
+// Admin tabs
+function switchAdminTab(tab) {
+    ['members', 'records', 'payments', 'settings'].forEach(t => {
+        document.getElementById('adminPanel-' + t).classList.add('hidden');
+        document.getElementById('adminTab-' + t).classList.remove('active');
+    });
+    document.getElementById('adminPanel-' + tab).classList.remove('hidden');
+    document.getElementById('adminTab-' + tab).classList.add('active');
+}
+
+// Studio tabs
+function switchStudioTab(tab) {
+    document.querySelectorAll('.studio-nav').forEach(el => { el.classList.remove('bg-purple-50', 'text-purple-700'); el.classList.add('text-gray-700'); });
+    const nav = document.getElementById('studioNav-' + tab);
+    if (nav) { nav.classList.add('bg-purple-50', 'text-purple-700'); nav.classList.remove('text-gray-700'); }
+    document.querySelectorAll('[id^="studioPanel-"]').forEach(el => el.classList.add('hidden'));
+    const panel = document.getElementById('studioPanel-' + tab);
+    if (panel) panel.classList.remove('hidden');
+}
+
+function selectStudioSlide(el) {
+    document.querySelectorAll('.slide-thumbnail').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+}
+
+// Dynamic Assessment Tab Switching
+function switchDATab(tab) {
+    ['overview', 'pretest', 'mediation', 'posttest', 'zpd'].forEach(t => {
+        document.getElementById('daPanel-' + t).classList.add('hidden');
+        document.getElementById('daTab-' + t).classList.remove('active');
+    });
+    document.getElementById('daPanel-' + tab).classList.remove('hidden');
+    document.getElementById('daTab-' + tab).classList.add('active');
+}
+
+function scrollToDATab(tab) {
+    switchDATab(tab);
+}
+
+function showDANewModal() {
+    showToast('新建动态评估流程：选择儿童 → 选择评估模块 → 开始前测');
+}
+
+// Date
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+
+// Close modal on backdrop click
+document.getElementById('methodDetailModal').addEventListener('click', function(e) { if (e.target === this) closeMethodModal(); });
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeMethodModal(); });
+</script>
+
+</body>
+</html>
