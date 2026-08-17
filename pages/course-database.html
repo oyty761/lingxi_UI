@@ -4,582 +4,63 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>课程中心 - 灵小犀</title>
-  <meta name="description" content="灵小犀学习困难儿童辅助平台课程中心">
+  <meta name="description" content="灵小犀叙事评估与干预课程中心">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    button, input, select, textarea { font: inherit; }
-    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-      outline: 3px solid var(--color-primary-light);
-      outline-offset: 2px;
-    }
-    .topnav__brand { cursor: pointer; }
-    .main__body { padding-bottom: var(--space-2xl); }
-    .stat-grid--four { grid-template-columns: repeat(4, 1fr); }
-    .stat-card { min-height: 112px; justify-content: center; transition: transform var(--transition-base), box-shadow var(--transition-base); }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-    .stat-card--neutral { background: var(--color-surface); }
-    .stat-card--neutral .stat-card__value { color: var(--color-info-dark); }
-    .stat-card--warning { background: var(--color-accent-light); border-color: transparent; }
-    .stat-card--warning .stat-card__value { color: var(--color-warning-dark); }
-
-    .course-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-base);
-      padding: var(--space-base) var(--space-lg);
-      border-bottom: 1px solid var(--color-divider);
-    }
-    .course-toolbar__filters { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-sm); }
-    .course-toolbar__search { position: relative; width: 250px; }
-    .course-toolbar__search::before {
-      content: "";
-      position: absolute;
-      left: 12px;
-      top: 11px;
-      width: 9px;
-      height: 9px;
-      border: 1.7px solid var(--color-text-tertiary);
-      border-radius: var(--radius-full);
-      pointer-events: none;
-    }
-    .course-toolbar__search::after {
-      content: "";
-      position: absolute;
-      left: 21px;
-      top: 21px;
-      width: 6px;
-      height: 1.7px;
-      background: var(--color-text-tertiary);
-      transform: rotate(45deg);
-      pointer-events: none;
-    }
-    .course-toolbar__search .input { padding-left: 36px; padding-right: 34px; }
-    .search-clear {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 32px;
-      height: 32px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-text-tertiary);
-      background: transparent;
-      border: 0;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-    }
-    .search-clear.is-visible { display: inline-flex; }
-    .search-clear:hover { color: var(--color-text-primary); background: var(--color-background); }
-    .course-toolbar__select {
-      height: 40px;
-      padding: 0 34px 0 var(--space-base);
-      color: var(--color-text-primary);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      outline: none;
-      cursor: pointer;
-    }
-    .course-toolbar__result { flex-shrink: 0; font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-
-    .course-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--space-lg);
-      padding: var(--space-lg);
-    }
-    .course-card {
-      position: relative;
-      min-width: 0;
-      overflow: hidden;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-      transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
-      cursor: pointer;
-    }
-    .course-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(107, 155, 208, 0.32); }
-    .course-card__cover {
-      position: relative;
-      height: 148px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: var(--color-primary-light);
-    }
-    .course-card[data-tone="green"] .course-card__cover { background: var(--color-secondary-light); }
-    .course-card[data-tone="yellow"] .course-card__cover { background: var(--color-accent-light); }
-    .course-card[data-tone="gray"] .course-card__cover { background: var(--color-background); }
-    .course-cover__motif {
-      width: 74px;
-      height: 74px;
-      display: grid;
-      place-items: center;
-      color: var(--color-primary);
-      font-size: var(--font-size-xl);
-      font-weight: var(--font-weight-semibold);
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(255,255,255,.9);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-sm);
-      transform: rotate(-4deg);
-    }
-    .course-card[data-tone="green"] .course-cover__motif { color: var(--color-success-dark); }
-    .course-card[data-tone="yellow"] .course-cover__motif { color: var(--color-warning-dark); }
-    .course-card[data-tone="gray"] .course-cover__motif { color: var(--color-info-dark); }
-    .course-cover__line {
-      position: absolute;
-      width: 130px;
-      height: 130px;
-      border: 1px solid rgba(255,255,255,.68);
-      border-radius: var(--radius-full);
-    }
-    .course-cover__line:first-child { transform: translate(-54px, 42px); }
-    .course-cover__line:nth-child(2) { transform: translate(62px, -48px); }
-    .course-card__status { position: absolute; top: var(--space-md); right: var(--space-md); }
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px var(--space-sm);
-      font-size: var(--font-size-xs);
-      font-weight: var(--font-weight-medium);
-      color: var(--color-text-secondary);
-      background: rgba(255,255,255,.88);
-      border-radius: var(--radius-full);
-      backdrop-filter: blur(8px);
-    }
-    .status-pill[data-status="已发布"] { color: var(--color-success-dark); }
-    .status-pill[data-status="审核中"] { color: var(--color-warning-dark); }
-    .status-pill[data-status="已归档"] { color: var(--color-info-dark); }
-    .course-card__metrics {
-      position: absolute;
-      left: var(--space-md);
-      bottom: var(--space-sm);
-      display: inline-flex;
-      gap: var(--space-sm);
-      padding: 3px var(--space-sm);
-      color: var(--color-text-secondary);
-      font-size: 11px;
-      background: rgba(255,255,255,.78);
-      border-radius: var(--radius-full);
-      backdrop-filter: blur(8px);
-    }
-    .course-card__body { padding: var(--space-base); }
-    .course-card__title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-sm); }
-    .course-card__title { min-width: 0; font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
-    .course-menu-button {
-      width: 30px;
-      height: 30px;
-      flex-shrink: 0;
-      color: var(--color-text-tertiary);
-      background: transparent;
-      border: 0;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      letter-spacing: 2px;
-    }
-    .course-menu-button:hover, .course-menu-button[aria-expanded="true"] { color: var(--color-primary); background: var(--color-primary-light); }
-    .course-card__description {
-      height: 42px;
-      margin-top: var(--space-xs);
-      overflow: hidden;
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-xs);
-      line-height: var(--line-height-normal);
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-    .course-card__footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-sm);
-      margin-top: var(--space-base);
-      padding-top: var(--space-md);
-      border-top: 1px solid var(--color-divider);
-    }
-    .course-card__meta { font-size: var(--font-size-xs); color: var(--color-text-tertiary); }
-    .course-card__owner { display: flex; align-items: center; gap: var(--space-xs); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-    .course-card__owner .avatar { width: 24px; height: 24px; }
-    .course-menu {
-      position: absolute;
-      right: var(--space-base);
-      bottom: 52px;
-      z-index: 30;
-      width: 120px;
-      display: none;
-      padding: var(--space-xs);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
-    }
-    .course-menu.is-open { display: block; }
-    .course-menu button {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      padding: var(--space-sm) var(--space-md);
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-xs);
-      text-align: left;
-      background: transparent;
-      border: 0;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-    }
-    .course-menu button:hover { color: var(--color-primary); background: var(--color-primary-light); }
-    .course-menu button.is-danger:hover { color: var(--color-error); background: var(--color-error-light); }
-    .new-course-card {
-      min-height: 304px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-text-secondary);
-      background: var(--color-background);
-      border: 2px dashed var(--color-border);
-      border-radius: var(--radius-lg);
-      cursor: pointer;
-      transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast);
-    }
-    .new-course-card:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-light); transform: translateY(-2px); }
-    .new-course-card__content { text-align: center; }
-    .new-course-card__icon {
-      width: 48px;
-      height: 48px;
-      display: grid;
-      place-items: center;
-      margin: 0 auto var(--space-md);
-      color: var(--color-primary);
-      font-size: var(--font-size-xl);
-      background: var(--color-surface);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-    }
-    .new-course-card strong { display: block; font-size: var(--font-size-sm); color: var(--color-text-primary); }
-    .new-course-card span:last-child { font-size: var(--font-size-xs); }
-    .course-empty { display: none; padding: var(--space-3xl); text-align: center; }
-    .course-empty.is-visible { display: block; }
-    .course-empty__icon { width: 56px; height: 56px; display: grid; place-items: center; margin: 0 auto var(--space-base); color: var(--color-text-tertiary); background: var(--color-background); border-radius: var(--radius-lg); }
-    .course-empty h3 { font-size: var(--font-size-base); }
-    .course-empty p { margin-top: var(--space-xs); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
-
-    .template-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); }
-    .template-option { position: relative; cursor: pointer; }
-    .template-option input { position: absolute; opacity: 0; pointer-events: none; }
-    .template-option__box {
-      min-height: 92px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: var(--space-xs);
-      padding: var(--space-md);
-      background: var(--color-background);
-      border: 1px solid transparent;
-      border-radius: var(--radius-md);
-      transition: border-color var(--transition-fast), background-color var(--transition-fast);
-    }
-    .template-option input:checked + .template-option__box { color: var(--color-primary); background: var(--color-primary-light); border-color: var(--color-primary); }
-    .template-option__box strong { font-size: var(--font-size-xs); }
-    .template-option__box span { font-size: 11px; color: var(--color-text-secondary); }
-    .form-error-text { display: none; font-size: var(--font-size-xs); color: var(--color-error); }
-    .input.is-invalid + .form-error-text { display: block; }
-    .confirm-copy { font-size: var(--font-size-sm); color: var(--color-text-primary); }
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: var(--space-xl);
-      z-index: 320;
-      max-width: calc(100vw - 32px);
-      padding: var(--space-md) var(--space-lg);
-      color: var(--color-text-on-primary);
-      font-size: var(--font-size-sm);
-      background: rgba(44,62,80,.94);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
-      opacity: 0;
-      pointer-events: none;
-      transform: translate(-50%, 12px);
-      transition: opacity var(--transition-base), transform var(--transition-base);
-    }
-    .toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
-
-    @media (max-width: 1024px) {
-      .stat-grid--four { grid-template-columns: repeat(2, 1fr); }
-      .course-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (max-width: 768px) {
-      .main__header { align-items: flex-start; }
-      .course-toolbar { align-items: stretch; flex-direction: column; }
-      .course-toolbar__search { width: 100%; }
-      .course-toolbar__filters { display: grid; grid-template-columns: 1fr 1fr; }
-      .course-toolbar__search { grid-column: 1 / -1; }
-      .course-toolbar__select { width: 100%; }
-      .course-toolbar__result { align-self: flex-end; }
-    }
-    @media (max-width: 560px) {
-      .main__header { flex-direction: column; }
-      .main__actions { width: 100%; }
-      .main__actions .btn { flex: 1; }
-      .stat-grid--four { grid-template-columns: 1fr 1fr; }
-      .stat-card { min-height: 100px; padding: var(--space-base); }
-      .stat-card__value { font-size: var(--font-size-xl); }
-      .course-grid { grid-template-columns: 1fr; padding: var(--space-base); }
-      .course-toolbar__filters { grid-template-columns: 1fr; }
-      .course-toolbar__search { grid-column: auto; }
-      .template-options { grid-template-columns: 1fr; }
-      .form-field--row { grid-template-columns: 1fr; }
-    }
+    .main__body{max-width:1320px;padding-bottom:44px}.main__header{max-width:1320px}.stat-grid--four{grid-template-columns:repeat(4,1fr)}
+    .selection-banner{display:none;align-items:center;justify-content:space-between;gap:20px;padding:18px 22px;color:var(--color-text-primary);background:var(--color-primary-light);border:1px solid rgba(107,155,208,.25);border-radius:var(--radius-lg)}
+    .selection-banner.is-visible{display:flex}.selection-banner__copy{display:flex;align-items:center;gap:14px}.selection-banner__icon{width:44px;height:44px;display:grid;place-items:center;color:var(--color-primary);background:#fff;border-radius:14px;font-weight:600}.selection-banner h2{font-size:var(--font-size-base)}.selection-banner p{color:var(--color-text-secondary);font-size:var(--font-size-xs)}
+    .flow-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.flow-step{position:relative;padding:15px 16px;background:var(--color-background);border:1px solid transparent;border-radius:var(--radius-md)}.flow-step.is-current{background:var(--color-primary-light);border-color:var(--color-primary)}.flow-step:not(:last-child)::after{content:"→";position:absolute;right:-11px;top:38%;z-index:2;width:22px;height:22px;display:grid;place-items:center;color:var(--color-primary);background:#fff;border-radius:50%;font-size:12px}.flow-step span{display:block;color:var(--color-primary);font-size:var(--font-size-xs);font-weight:600}.flow-step strong{display:block;margin-top:4px;font-size:var(--font-size-sm)}
+    .course-toolbar{padding:18px 22px;border-bottom:1px solid var(--color-divider)}.course-toolbar__row{display:grid;grid-template-columns:minmax(220px,1.4fr) repeat(3,minmax(150px,.7fr));gap:12px}.course-toolbar select{height:40px;padding:0 34px 0 12px;color:var(--color-text-primary);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);font:inherit;font-size:var(--font-size-sm)}
+    .filter-tags{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:14px}.filter-label{margin-right:4px;color:var(--color-text-secondary);font-size:var(--font-size-xs)}.filter-tag{height:30px;padding:0 12px;color:var(--color-text-secondary);background:var(--color-background);border:1px solid transparent;border-radius:var(--radius-full);font:inherit;font-size:var(--font-size-xs);cursor:pointer}.filter-tag.is-active{color:var(--color-primary);background:var(--color-primary-light);border-color:rgba(107,155,208,.28)}
+    .course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:22px}.course-card{display:flex;flex-direction:column;min-height:290px;overflow:hidden;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);transition:transform var(--transition-base),box-shadow var(--transition-base),border-color var(--transition-base)}.course-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:rgba(107,155,208,.5)}
+    .course-card__cover{position:relative;height:104px;padding:18px;background:linear-gradient(135deg,var(--cover-a),var(--cover-b));overflow:hidden}.course-card__cover::after{content:attr(data-mark);position:absolute;right:16px;bottom:-24px;color:rgba(255,255,255,.42);font-size:82px;font-weight:600}.course-card__number{position:relative;z-index:1;color:rgba(44,62,80,.55);font-size:var(--font-size-xs)}.course-card__theme{position:relative;z-index:1;display:inline-flex;margin-top:26px;padding:3px 9px;color:var(--color-text-primary);background:rgba(255,255,255,.78);border-radius:var(--radius-full);font-size:var(--font-size-xs)}
+    .course-card__body{display:flex;flex:1;flex-direction:column;padding:18px}.course-card__title-row{display:flex;align-items:start;justify-content:space-between;gap:12px}.course-card h3{font-size:var(--font-size-md)}.recommend{flex-shrink:0;color:var(--color-success-dark);font-size:var(--font-size-xs)}.course-card__story{margin:8px 0 14px;color:var(--color-text-secondary);font-size:var(--font-size-xs);line-height:1.7}.meta-line{display:grid;grid-template-columns:56px 1fr;gap:8px;margin-top:5px;font-size:var(--font-size-xs)}.meta-line span:first-child{color:var(--color-text-tertiary)}.meta-line span:last-child{color:var(--color-text-secondary)}.feature-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.feature-chip{padding:3px 8px;color:var(--color-primary);background:var(--color-primary-light);border-radius:var(--radius-full);font-size:11px}.course-card__footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:16px}.course-card__footer small{color:var(--color-text-tertiary)}
+    .empty-state{display:none}.empty-state.is-visible{display:flex}.pending-badge{margin-left:6px;padding:2px 6px;color:var(--color-warning-dark);background:var(--color-accent-light);border-radius:var(--radius-full);font-size:10px}.toast{position:fixed;left:50%;bottom:28px;z-index:300;transform:translate(-50%,18px);padding:10px 18px;color:#fff;background:rgba(44,62,80,.92);border-radius:var(--radius-full);opacity:0;pointer-events:none;transition:all var(--transition-base);font-size:var(--font-size-sm)}.toast.is-visible{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:1050px){.stat-grid--four{grid-template-columns:repeat(2,1fr)}.course-grid{grid-template-columns:repeat(2,1fr)}.course-toolbar__row{grid-template-columns:1fr 1fr}.flow-strip{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:680px){.main__actions{display:none}.stat-grid--four,.course-grid,.course-toolbar__row,.flow-strip{grid-template-columns:1fr}.course-grid{padding:14px}.selection-banner{align-items:flex-start;flex-direction:column}.flow-step:not(:last-child)::after{display:none}}
   </style>
 </head>
 <body>
   <div class="app-layout">
-    <nav class="topnav" role="navigation" aria-label="主导航">
-      <a class="topnav__brand" href="index.html" aria-label="返回灵小犀工作台">
-        <div class="topnav__logo">LOGO</div><span class="topnav__name">灵小犀</span>
-      </a>
-      <div class="topnav__nav">
-        <a class="topnav__link" href="index.html">
-          <svg class="topnav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>工作台
-        </a>
-        <a class="topnav__link" href="case-database.html">
-          <svg class="topnav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>个案数据库
-        </a>
-        <a class="topnav__link is-active" href="course-database.html" aria-current="page">
-          <svg class="topnav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>课程中心
-        </a>
-      </div>
-      <div class="topnav__user"><div class="avatar">U</div><span>管理员</span></div>
-    </nav>
-
+    <nav class="topnav" aria-label="主导航"><a class="topnav__brand" href="index.html"><div class="topnav__logo">犀</div><span class="topnav__name">灵小犀</span></a><div class="topnav__nav"><a class="topnav__link" href="index.html">工作台</a><a class="topnav__link" href="case-database.html">个案数据库</a><a class="topnav__link is-active" href="course-database.html" aria-current="page">课程中心</a></div><div class="topnav__user"><div class="avatar">U</div><span>管理员</span></div></nav>
     <main class="main">
-      <header class="main__header">
-        <div><h1 class="main__title">课程中心</h1><p class="main__subtitle">管理干预课程、课件内容与发布状态</p></div>
-        <div class="main__actions">
-          <button class="btn btn--secondary btn--sm" type="button" id="importButton">导入课程</button>
-          <button class="btn btn--primary btn--sm" type="button" data-open-create>＋ 新建课程</button>
-        </div>
-      </header>
-
+      <header class="main__header"><div><h1 class="main__title" id="pageTitle">课程中心</h1><p class="main__subtitle" id="pageSubtitle">围绕儿童叙事能力目标管理评估与干预课程</p></div><div class="main__actions"><button class="btn btn--secondary btn--sm" type="button" data-pending>导入课程 <span class="pending-badge">待确认</span></button><button class="btn btn--primary btn--sm" type="button" data-pending>＋ 新增课程 <span class="pending-badge">待确认</span></button></div></header>
       <div class="main__body">
-        <section class="stat-grid stat-grid--four" aria-label="课程数据概览">
-          <article class="stat-card stat-card--primary"><span class="stat-card__label">全部课程</span><strong class="stat-card__value" id="statTotal">4</strong><span class="stat-card__trend">持续沉淀课程资源</span></article>
-          <article class="stat-card stat-card--secondary"><span class="stat-card__label">已发布</span><strong class="stat-card__value" id="statPublished">2</strong><span class="stat-card__trend">可直接用于课堂</span></article>
-          <article class="stat-card stat-card--warning"><span class="stat-card__label">审核中</span><strong class="stat-card__value" id="statReview">1</strong><span class="stat-card__trend">等待内容确认</span></article>
-          <article class="stat-card stat-card--neutral"><span class="stat-card__label">累计使用</span><strong class="stat-card__value">86</strong><span class="stat-card__trend">本月使用 18 次</span></article>
-        </section>
-
-        <section class="card" aria-labelledby="courseListTitle">
-          <div class="card__header">
-            <div><h2 class="card__title" id="courseListTitle">课程项目</h2><p class="main__subtitle">点击课程卡片进入课程编辑与预览</p></div>
-            <span class="course-toolbar__result" id="resultCount">共 4 门课程</span>
-          </div>
-          <div class="course-toolbar">
-            <div class="course-toolbar__filters">
-              <div class="course-toolbar__search">
-                <input class="input" id="courseSearch" type="search" placeholder="搜索课程名称或内容" autocomplete="off">
-                <button class="search-clear" id="searchClear" type="button" aria-label="清空搜索">×</button>
-              </div>
-              <select class="course-toolbar__select" id="statusFilter" aria-label="按状态筛选">
-                <option value="all">全部状态</option><option value="草稿">草稿</option><option value="审核中">审核中</option><option value="已发布">已发布</option><option value="已归档">已归档</option>
-              </select>
-              <select class="course-toolbar__select" id="typeFilter" aria-label="按类型筛选">
-                <option value="all">全部类型</option><option value="语言训练">语言训练</option><option value="数学训练">数学训练</option><option value="书写训练">书写训练</option><option value="综合训练">综合训练</option>
-              </select>
-              <select class="course-toolbar__select" id="sortFilter" aria-label="课程排序">
-                <option value="updated">最近更新</option><option value="name">名称排序</option><option value="usage">使用次数</option>
-              </select>
-            </div>
-          </div>
-          <div class="course-grid" id="courseGrid" aria-live="polite"></div>
-          <div class="course-empty" id="courseEmpty">
-            <div class="course-empty__icon">⌕</div><h3>没有找到匹配课程</h3><p>试试更换关键词或筛选条件</p><button class="btn btn--secondary btn--sm" type="button" id="resetFilters" style="margin-top:var(--space-base)">清除筛选</button>
-          </div>
+        <section class="selection-banner" id="selectionBanner" aria-live="polite"><div class="selection-banner__copy"><div class="selection-banner__icon">选</div><div><h2>正在为 <span id="caseName">当前个案</span> 选择课程</h2><p>选定后将课程推送至个案名下，并进入本次叙事干预课堂。</p></div></div><a class="btn btn--secondary btn--sm" href="case-database.html">更换个案</a></section>
+        <section class="stat-grid stat-grid--four" aria-label="课程概览"><article class="stat-card stat-card--primary"><span class="stat-card__label">故事课程</span><strong class="stat-card__value">18</strong><span class="stat-card__trend">叙事干预课程资源</span></article><article class="stat-card stat-card--secondary"><span class="stat-card__label">叙事评估</span><strong class="stat-card__value">5</strong><span class="stat-card__trend">含录音与结果分析</span></article><article class="stat-card stat-card--accent"><span class="stat-card__label">本周使用</span><strong class="stat-card__value">12</strong><span class="stat-card__trend">覆盖 8 名儿童</span></article><article class="stat-card"><span class="stat-card__label">推荐待确认</span><strong class="stat-card__value">3</strong><span class="stat-card__trend">基于个案分析结果</span></article></section>
+        <section class="card" aria-labelledby="flowTitle"><div class="card__header"><div><h2 class="card__title" id="flowTitle">IEP 方案与选课流程</h2><p class="main__subtitle">课程选择完成后，系统将内容推送至个案名下</p></div><span class="tag tag--primary">叙事干预</span></div><div class="card__body"><div class="flow-strip"><div class="flow-step"><span>01</span><strong>分析结果</strong></div><div class="flow-step"><span>02</span><strong>推荐课程</strong></div><div class="flow-step is-current"><span>03</span><strong>课程选择</strong></div><div class="flow-step"><span>04</span><strong>生成并推送</strong></div></div></div></section>
+        <section class="card" aria-labelledby="courseListTitle"><div class="card__header"><div><h2 class="card__title" id="courseListTitle">课程项目</h2><p class="main__subtitle">按故事目标、核心问题和课堂功能选择课程</p></div><span class="text-muted" id="resultCount">共 8 门课程</span></div>
+          <div class="course-toolbar"><div class="course-toolbar__row"><input class="input" id="searchInput" type="search" placeholder="搜索故事名称、主题或核心问题"><select id="moduleFilter" aria-label="业务模块"><option value="all">全部业务模块</option><option value="叙事干预">叙事干预</option><option value="叙事评估">叙事评估</option></select><select id="goalFilter" aria-label="教学目标"><option value="all">全部教学目标</option><option value="故事语法">故事语法</option><option value="故事理解">故事理解</option><option value="完整叙述">完整叙述</option><option value="情感表达">情感表达</option></select><select id="featureFilter" aria-label="课堂功能"><option value="all">全部课堂功能</option><option value="脚本播放">脚本播放</option><option value="提问与回答">提问与回答</option><option value="图片与图标">图片与图标</option><option value="录音分析">录音分析</option></select></div>
+            <div class="filter-tags" role="group" aria-label="主题快捷筛选"><span class="filter-label">故事主题</span><button class="filter-tag is-active" type="button" data-theme="all">全部</button><button class="filter-tag" type="button" data-theme="坚持与毅力">坚持与毅力</button><button class="filter-tag" type="button" data-theme="责任与友谊">责任与友谊</button><button class="filter-tag" type="button" data-theme="勇气与克服恐惧">勇气与克服恐惧</button><button class="filter-tag" type="button" data-theme="合作与表达">合作与表达</button></div>
+          </div><div class="course-grid" id="courseGrid" aria-live="polite"></div><div class="empty-state" id="emptyState"><strong>没有找到匹配的课程</strong><span>请调整关键词或筛选条件</span><button class="btn btn--secondary btn--sm" id="resetButton" type="button">清除筛选</button></div>
         </section>
       </div>
     </main>
   </div>
-
-  <div class="modal" id="createModal" role="dialog" aria-modal="true" aria-labelledby="createModalTitle">
-    <div class="modal__container">
-      <form id="createForm" novalidate>
-        <div class="modal__header"><h2 class="modal__title" id="createModalTitle">新建课程</h2><button class="modal__close" type="button" aria-label="关闭" data-close-modal="createModal">×</button></div>
-        <div class="modal__body">
-          <div class="form-field"><label class="form-field__label" for="courseName">课程名称</label><input class="input" id="courseName" type="text" placeholder="例如：基础阅读理解训练" maxlength="30" required><span class="form-error-text">请输入课程名称</span></div>
-          <div class="form-field"><label class="form-field__label" for="courseDescription">课程简介</label><textarea class="input" id="courseDescription" placeholder="简要说明训练目标与适用内容" maxlength="100"></textarea><span class="form-field__hint"><span id="descriptionCount">0</span>/100</span></div>
-          <div class="form-field"><label class="form-field__label" for="courseType">课程类型</label><select class="input" id="courseType"><option>语言训练</option><option>数学训练</option><option>书写训练</option><option>综合训练</option></select></div>
-          <div class="form-field"><span class="form-field__label">创建方式</span><div class="template-options">
-            <label class="template-option"><input type="radio" name="template" value="blank" checked><span class="template-option__box"><strong>空白课程</strong><span>自由搭建内容</span></span></label>
-            <label class="template-option"><input type="radio" name="template" value="language"><span class="template-option__box"><strong>语言训练模板</strong><span>含示范与跟读</span></span></label>
-            <label class="template-option"><input type="radio" name="template" value="group"><span class="template-option__box"><strong>小组课模板</strong><span>含互动环节</span></span></label>
-          </div></div>
-        </div>
-        <div class="modal__footer"><button class="btn btn--secondary btn--sm" type="button" data-close-modal="createModal">取消</button><button class="btn btn--primary btn--sm" type="submit">创建并编辑</button></div>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-    <div class="modal__container" style="max-width:420px">
-      <div class="modal__header"><h2 class="modal__title" id="confirmTitle">确认操作</h2><button class="modal__close" type="button" aria-label="关闭" data-close-modal="confirmModal">×</button></div>
-      <div class="modal__body"><p class="confirm-copy" id="confirmCopy"></p></div>
-      <div class="modal__footer"><button class="btn btn--secondary btn--sm" type="button" data-close-modal="confirmModal">取消</button><button class="btn btn--danger btn--sm" type="button" id="confirmAction">确认</button></div>
-    </div>
-  </div>
-
-  <input type="file" id="importInput" accept=".json,.zip" hidden>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
   <script>
-  (function () {
-    let courses = [
-      { id: 1, name: '语音意识训练课程', description: '音节意识、首音—韵脚与音素操作的渐进式训练。', type: '语言训练', status: '草稿', slides: 8, media: 3, duration: '12:30', updated: 4, updatedText: '2 小时前', usage: 18, owner: '李', tone: 'blue' },
-      { id: 2, name: '数感培养动画课程', description: '通过数量比较、数线估计和基本运算建立稳定数感。', type: '数学训练', status: '已发布', slides: 12, media: 2, duration: '08:45', updated: 3, updatedText: '昨天', usage: 32, owner: '张', tone: 'green' },
-      { id: 3, name: '书写技能训练课件', description: '覆盖笔画笔顺、间架结构与书写速度专项练习。', type: '书写训练', status: '审核中', slides: 15, media: 1, duration: '15:20', updated: 2, updatedText: '3 天前', usage: 11, owner: '王', tone: 'yellow' },
-      { id: 4, name: '课堂注意力启动活动', description: '适用于课程前 5 分钟的视觉搜索与节奏模仿活动。', type: '综合训练', status: '已发布', slides: 6, media: 2, duration: '05:00', updated: 1, updatedText: '1 周前', usage: 25, owner: '陈', tone: 'gray' }
-    ];
-    let confirmCallback = null;
-    let toastTimer = null;
-    const grid = document.getElementById('courseGrid');
-    const searchInput = document.getElementById('courseSearch');
-    const statusFilter = document.getElementById('statusFilter');
-    const typeFilter = document.getElementById('typeFilter');
-    const sortFilter = document.getElementById('sortFilter');
-
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, function (char) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]; });
-    }
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      clearTimeout(toastTimer); toast.textContent = message; toast.classList.add('is-visible');
-      toastTimer = setTimeout(function () { toast.classList.remove('is-visible'); }, 2400);
-    }
-    function openModal(id) {
-      const modal = document.getElementById(id); modal.classList.add('is-open');
-      requestAnimationFrame(function () { modal.classList.add('is-visible'); });
-      document.body.style.overflow = 'hidden';
-      const focusable = modal.querySelector('input:not([type="radio"]), button'); if (focusable) setTimeout(function () { focusable.focus(); }, 50);
-    }
-    function closeModal(id) {
-      const modal = document.getElementById(id); modal.classList.remove('is-visible');
-      setTimeout(function () { modal.classList.remove('is-open'); if (!document.querySelector('.modal.is-open')) document.body.style.overflow = ''; }, 200);
-    }
-    function updateStats() {
-      document.getElementById('statTotal').textContent = courses.length;
-      document.getElementById('statPublished').textContent = courses.filter(function (c) { return c.status === '已发布'; }).length;
-      document.getElementById('statReview').textContent = courses.filter(function (c) { return c.status === '审核中'; }).length;
-    }
-    function getVisibleCourses() {
-      const keyword = searchInput.value.trim().toLowerCase();
-      let list = courses.filter(function (course) {
-        const matchKeyword = !keyword || (course.name + ' ' + course.description + ' ' + course.type).toLowerCase().includes(keyword);
-        const matchStatus = statusFilter.value === 'all' || course.status === statusFilter.value;
-        const matchType = typeFilter.value === 'all' || course.type === typeFilter.value;
-        return matchKeyword && matchStatus && matchType;
-      });
-      if (sortFilter.value === 'name') list.sort(function (a,b) { return a.name.localeCompare(b.name, 'zh-CN'); });
-      else if (sortFilter.value === 'usage') list.sort(function (a,b) { return b.usage - a.usage; });
-      else list.sort(function (a,b) { return b.updated - a.updated; });
-      return list;
-    }
-    function renderCourses() {
-      const visible = getVisibleCourses();
-      document.getElementById('resultCount').textContent = '共 ' + visible.length + ' 门课程';
-      document.getElementById('courseEmpty').classList.toggle('is-visible', visible.length === 0);
-      grid.style.display = visible.length ? 'grid' : 'none';
-      grid.innerHTML = visible.map(function (course) {
-        return '<article class="course-card" data-id="' + course.id + '" data-tone="' + course.tone + '" tabindex="0" aria-label="打开课程：' + escapeHtml(course.name) + '">' +
-          '<div class="course-card__cover"><span class="course-cover__line"></span><span class="course-cover__line"></span><div class="course-cover__motif">' + escapeHtml(course.type.slice(0,1)) + '</div>' +
-          '<span class="course-card__status status-pill" data-status="' + course.status + '">' + course.status + '</span><span class="course-card__metrics">' + course.slides + ' 页 · ' + course.media + ' 个媒体 · ' + course.duration + '</span></div>' +
-          '<div class="course-card__body"><div class="course-card__title-row"><h3 class="course-card__title">' + escapeHtml(course.name) + '</h3><button class="course-menu-button" type="button" aria-label="更多操作" aria-expanded="false" data-menu-button>•••</button></div>' +
-          '<p class="course-card__description">' + escapeHtml(course.description) + '</p><div class="course-card__footer"><span class="course-card__owner"><span class="avatar">' + escapeHtml(course.owner) + '</span>' + escapeHtml(course.type) + '</span><span class="course-card__meta">' + escapeHtml(course.updatedText) + '</span></div></div>' +
-          '<div class="course-menu"><button type="button" data-action="edit">编辑课程</button><button type="button" data-action="duplicate">创建副本</button><button type="button" data-action="archive">' + (course.status === '已归档' ? '恢复课程' : '归档课程') + '</button><button class="is-danger" type="button" data-action="delete">删除课程</button></div></article>';
-      }).join('') + '<button class="new-course-card" type="button" data-open-create><span class="new-course-card__content"><span class="new-course-card__icon">＋</span><strong>创建新课程</strong><span>从模板或空白课程开始</span></span></button>';
-      bindCourseEvents(); updateStats();
-    }
-    function goToDetail(course) {
-      window.location.href = 'course-detail.html?id=' + course.id + '&name=' + encodeURIComponent(course.name);
-    }
-    function bindCourseEvents() {
-      grid.querySelectorAll('.course-card').forEach(function (card) {
-        const id = Number(card.dataset.id); const course = courses.find(function (item) { return item.id === id; });
-        card.addEventListener('click', function (event) { if (!event.target.closest('button') && !event.target.closest('.course-menu')) goToDetail(course); });
-        card.addEventListener('keydown', function (event) { if ((event.key === 'Enter' || event.key === ' ') && event.target === card) { event.preventDefault(); goToDetail(course); } });
-        const menuButton = card.querySelector('[data-menu-button]'); const menu = card.querySelector('.course-menu');
-        menuButton.addEventListener('click', function (event) {
-          event.stopPropagation(); const willOpen = !menu.classList.contains('is-open'); closeMenus();
-          menu.classList.toggle('is-open', willOpen); menuButton.setAttribute('aria-expanded', String(willOpen));
-        });
-        menu.querySelectorAll('[data-action]').forEach(function (button) {
-          button.addEventListener('click', function (event) {
-            event.stopPropagation(); closeMenus(); const action = button.dataset.action;
-            if (action === 'edit') goToDetail(course);
-            if (action === 'duplicate') {
-              const copy = Object.assign({}, course, { id: Date.now(), name: course.name + '（副本）', status: '草稿', updated: 9, updatedText: '刚刚', usage: 0 });
-              courses.unshift(copy); renderCourses(); showToast('已创建课程副本');
-            }
-            if (action === 'archive') {
-              course.status = course.status === '已归档' ? '草稿' : '已归档'; course.updated = 10; course.updatedText = '刚刚'; renderCourses(); showToast(course.status === '已归档' ? '课程已归档' : '课程已恢复为草稿');
-            }
-            if (action === 'delete') {
-              document.getElementById('confirmTitle').textContent = '删除课程'; document.getElementById('confirmCopy').textContent = '确定要删除「' + course.name + '」吗？删除后无法恢复。';
-              confirmCallback = function () { courses = courses.filter(function (item) { return item.id !== course.id; }); closeModal('confirmModal'); renderCourses(); showToast('课程已删除'); };
-              openModal('confirmModal');
-            }
-          });
-        });
-      });
-      grid.querySelectorAll('[data-open-create]').forEach(function (button) { button.addEventListener('click', function (event) { event.stopPropagation(); openCreateModal(); }); });
-    }
-    function closeMenus() {
-      document.querySelectorAll('.course-menu.is-open').forEach(function (menu) { menu.classList.remove('is-open'); const button = menu.parentElement.querySelector('[data-menu-button]'); if (button) button.setAttribute('aria-expanded','false'); });
-    }
-    function openCreateModal() {
-      document.getElementById('createForm').reset(); document.getElementById('courseName').classList.remove('is-invalid'); document.getElementById('descriptionCount').textContent = '0'; openModal('createModal');
-    }
-    function resetFilters() {
-      searchInput.value = ''; statusFilter.value = 'all'; typeFilter.value = 'all'; sortFilter.value = 'updated'; document.getElementById('searchClear').classList.remove('is-visible'); renderCourses();
-    }
-
-    [searchInput, statusFilter, typeFilter, sortFilter].forEach(function (control) { control.addEventListener(control === searchInput ? 'input' : 'change', function () { document.getElementById('searchClear').classList.toggle('is-visible', Boolean(searchInput.value)); renderCourses(); }); });
-    document.getElementById('searchClear').addEventListener('click', function () { searchInput.value = ''; searchInput.focus(); this.classList.remove('is-visible'); renderCourses(); });
-    document.getElementById('resetFilters').addEventListener('click', resetFilters);
-    document.querySelectorAll('[data-open-create]').forEach(function (button) { button.addEventListener('click', openCreateModal); });
-    document.querySelectorAll('[data-close-modal]').forEach(function (button) { button.addEventListener('click', function () { closeModal(button.dataset.closeModal); }); });
-    document.querySelectorAll('.modal').forEach(function (modal) { modal.addEventListener('click', function (event) { if (event.target === modal) closeModal(modal.id); }); });
-    document.getElementById('courseDescription').addEventListener('input', function () { document.getElementById('descriptionCount').textContent = this.value.length; });
-    document.getElementById('courseName').addEventListener('input', function () { this.classList.remove('is-invalid'); });
-    document.getElementById('createForm').addEventListener('submit', function (event) {
-      event.preventDefault(); const nameInput = document.getElementById('courseName'); const name = nameInput.value.trim();
-      if (!name) { nameInput.classList.add('is-invalid'); nameInput.focus(); return; }
-      const type = document.getElementById('courseType').value; const template = document.querySelector('input[name="template"]:checked').value;
-      const slides = template === 'blank' ? 1 : template === 'language' ? 6 : 5;
-      const course = { id: Date.now(), name: name, description: document.getElementById('courseDescription').value.trim() || '暂未填写课程简介。', type: type, status: '草稿', slides: slides, media: 0, duration: '00:00', updated: 12, updatedText: '刚刚', usage: 0, owner: 'U', tone: type === '数学训练' ? 'green' : type === '书写训练' ? 'yellow' : type === '综合训练' ? 'gray' : 'blue' };
-      courses.unshift(course); closeModal('createModal'); renderCourses(); showToast('课程已创建，即将进入编辑'); setTimeout(function () { goToDetail(course); }, 650);
-    });
-    document.getElementById('confirmAction').addEventListener('click', function () { if (confirmCallback) { const callback = confirmCallback; confirmCallback = null; callback(); } });
-    document.getElementById('importButton').addEventListener('click', function () { document.getElementById('importInput').click(); });
-    document.getElementById('importInput').addEventListener('change', function () {
-      if (!this.files.length) return;
-      const file = this.files[0];
-      const importedName = file.name.replace(/\.(json|zip)$/i, '') || '导入课程';
-      showToast('正在读取「' + file.name + '」');
-      setTimeout(function () {
-        courses.unshift({ id: Date.now(), name: importedName, description: '由本地课程包导入，等待补充课程简介。', type: '综合训练', status: '草稿', slides: 1, media: 0, duration: '00:00', updated: 11, updatedText: '刚刚', usage: 0, owner: 'U', tone: 'gray' });
-        resetFilters();
-        showToast('课程包已导入为草稿');
-      }, 900);
-      this.value = '';
-    });
-    document.addEventListener('click', function (event) { if (!event.target.closest('.course-menu') && !event.target.closest('[data-menu-button]')) closeMenus(); });
-    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { closeMenus(); document.querySelectorAll('.modal.is-open').forEach(function (modal) { closeModal(modal.id); }); } });
-    renderCourses();
-  })();
+    (function(){
+      var courses=[
+        {id:1,name:'小明的新自行车',theme:'坚持与毅力',problem:'学骑车摔倒了',ending:'学会了骑自行车',module:'叙事干预',goal:'故事语法',features:['脚本播放','提问与回答','图片与图标','录音分析'],summary:'从收到礼物、跌倒受挫到重新尝试，练习完整讲述事件起因、经过与结果。',mark:'车',colors:['#e8f0f8','#dbe8f3'],recommended:true},
+        {id:2,name:'小红的小狗丢了',theme:'责任与友谊',problem:'豆豆走丢了',ending:'王阿姨找到了豆豆',module:'叙事干预',goal:'故事理解',features:['脚本播放','提问与回答','录音分析'],summary:'理解人物目标、问题与解决办法，练习回答故事理解问题。',mark:'友',colors:['#e8f5ed','#d9eee2']},
+        {id:3,name:'小学学游泳',theme:'勇气与克服恐惧',problem:'害怕水不敢游泳',ending:'学会了游泳',module:'叙事干预',goal:'情感表达',features:['脚本播放','图片与图标','录音分析'],summary:'识别害怕、尝试和成功后的情绪变化，学习表达人物感受。',mark:'勇',colors:['#fcf4e3','#f7e8c7']},
+        {id:4,name:'公园里的风筝',theme:'责任与友谊',problem:'风筝卡在树上',ending:'取下风筝成了好朋友',module:'叙事干预',goal:'完整叙述',features:['脚本播放','提问与回答','图片与图标'],summary:'围绕求助与合作组织多角色事件，练习连接词和结局表达。',mark:'筝',colors:['#f9e8e8','#f3dada']},
+        {id:5,name:'小美的画画比赛',theme:'合作与表达',problem:'同桌说画得不像',ending:'获得一等奖',module:'叙事评估',goal:'完整叙述',features:['图片与图标','录音分析'],summary:'使用连续图片完成个人讲述，生成转录文本并用于语言样本分析。',mark:'画',colors:['#e9edf6','#dce3f0']},
+        {id:6,name:'小熊去露营',theme:'勇气与克服恐惧',problem:'晚上害怕奇怪声音',ending:'克服恐惧喜欢露营',module:'叙事干预',goal:'故事理解',features:['脚本播放','提问与回答','录音分析'],summary:'通过顺序或随机提问检查因果、推理与人物情绪理解。',mark:'营',colors:['#e8f5ed','#d7eadf']},
+        {id:7,name:'小强的足球队',theme:'合作与表达',problem:'最好的射手受伤',ending:'赢得了比赛冠军',module:'叙事干预',goal:'故事语法',features:['脚本播放','提问与回答','图片与图标'],summary:'梳理团队目标、阻碍、行动与结果，强化故事语法要素。',mark:'球',colors:['#fcf4e3','#f4e2b9']},
+        {id:8,name:'迷路的猫咪',theme:'责任与友谊',problem:'发现迷路的小猫',ending:'找到主人并收到感谢',module:'叙事评估',goal:'情感表达',features:['图片与图标','录音分析'],summary:'看图讲述并完成录音转写，观察情绪词、指代和叙事连贯性。',mark:'猫',colors:['#f9e8e8','#eed7df']}
+      ];
+      var params=new URLSearchParams(location.search),caseName=params.get('caseName')||'',caseId=params.get('case')||'',selecting=params.get('mode')==='select'||!!caseName,theme='all';
+      var grid=document.getElementById('courseGrid'),search=document.getElementById('searchInput'),moduleFilter=document.getElementById('moduleFilter'),goalFilter=document.getElementById('goalFilter'),featureFilter=document.getElementById('featureFilter'),empty=document.getElementById('emptyState'),count=document.getElementById('resultCount');
+      if(selecting){document.getElementById('selectionBanner').classList.add('is-visible');document.getElementById('caseName').textContent=caseName||'当前个案';document.getElementById('pageTitle').textContent='为个案选择课程';document.getElementById('pageSubtitle').textContent='确认课程后生成内容并推送至个案名下';}
+      var moduleParam=params.get('module');if(moduleParam&&Array.from(moduleFilter.options).some(function(o){return o.value===moduleParam})){moduleFilter.value=moduleParam;}
+      function esc(value){return String(value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+      function courseUrl(c){var q=new URLSearchParams({id:c.id,name:c.name});if(caseName)q.set('caseName',caseName);if(caseId)q.set('case',caseId);return 'course-detail.html?'+q.toString()}
+      function render(){var keyword=search.value.trim().toLowerCase();var list=courses.filter(function(c){return(!keyword||(c.name+c.theme+c.problem+c.ending+c.summary).toLowerCase().includes(keyword))&&(moduleFilter.value==='all'||c.module===moduleFilter.value)&&(goalFilter.value==='all'||c.goal===goalFilter.value)&&(featureFilter.value==='all'||c.features.includes(featureFilter.value))&&(theme==='all'||c.theme===theme)});count.textContent='共 '+list.length+' 门课程';grid.innerHTML=list.map(function(c,i){return '<article class="course-card"><div class="course-card__cover" data-mark="'+esc(c.mark)+'" style="--cover-a:'+c.colors[0]+';--cover-b:'+c.colors[1]+'"><span class="course-card__number">STORY '+String(c.id).padStart(2,'0')+'</span><span class="course-card__theme">'+esc(c.theme)+'</span></div><div class="course-card__body"><div class="course-card__title-row"><h3>'+esc(c.name)+'</h3>'+(c.recommended?'<span class="recommend">★ 优先推荐</span>':'')+'</div><p class="course-card__story">'+esc(c.summary)+'</p><div class="meta-line"><span>核心问题</span><span>'+esc(c.problem)+'</span></div><div class="meta-line"><span>故事结局</span><span>'+esc(c.ending)+'</span></div><div class="feature-list">'+c.features.map(function(f){return'<span class="feature-chip">'+esc(f)+'</span>'}).join('')+'</div><div class="course-card__footer"><small>'+esc(c.module)+' · '+esc(c.goal)+'</small><a class="btn '+(selecting?'btn--primary':'btn--secondary')+' btn--sm" href="'+courseUrl(c)+'">'+(selecting?'选择并开始':'进入课程')+'</a></div></div></article>'}).join('');grid.style.display=list.length?'grid':'none';empty.classList.toggle('is-visible',!list.length)}
+      [search,moduleFilter,goalFilter,featureFilter].forEach(function(el){el.addEventListener(el===search?'input':'change',render)});document.querySelectorAll('[data-theme]').forEach(function(btn){btn.addEventListener('click',function(){theme=btn.dataset.theme;document.querySelectorAll('[data-theme]').forEach(function(b){b.classList.toggle('is-active',b===btn)});render()})});document.getElementById('resetButton').addEventListener('click',function(){search.value='';moduleFilter.value='all';goalFilter.value='all';featureFilter.value='all';theme='all';document.querySelectorAll('[data-theme]').forEach(function(b){b.classList.toggle('is-active',b.dataset.theme==='all')});render()});
+      var toast=document.getElementById('toast'),timer;document.querySelectorAll('[data-pending]').forEach(function(btn){btn.addEventListener('click',function(){clearTimeout(timer);toast.textContent='该入口已保留，字段与导入规则待与老师确认';toast.classList.add('is-visible');timer=setTimeout(function(){toast.classList.remove('is-visible')},2600)})});render();
+    })();
   </script>
 </body>
 </html>
