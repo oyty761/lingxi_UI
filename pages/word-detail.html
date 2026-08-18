@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>字词详细解释 - 灵小犀</title>
+  <meta name="description" content="查看录音转写字词的拼音、释义、组词和例句">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .dictionary-main{min-height:calc(100vh - 64px);padding:28px;background:var(--color-background)}
+    .dictionary-shell{width:min(1040px,100%);margin:auto}
+    .back-link{display:inline-flex;align-items:center;gap:6px;margin-bottom:18px;color:var(--color-text-secondary);font-size:var(--font-size-sm)}
+    .word-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:30px 34px;background:linear-gradient(135deg,#edf4fb,#f2f8f5);border:1px solid rgba(107,155,208,.22);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}
+    .word-hero__main{display:flex;align-items:center;gap:22px}
+    .word-glyph{min-width:92px;height:92px;display:grid;place-items:center;color:var(--color-primary);background:#fff;border:1px solid rgba(107,155,208,.2);border-radius:24px;font-size:44px;font-weight:600;box-shadow:var(--shadow-sm)}
+    .word-kicker{display:block;color:var(--color-primary);font-size:var(--font-size-xs);font-weight:600}
+    .word-title{margin-top:2px;font-size:34px}
+    .word-pinyin{display:block;margin-top:4px;color:var(--color-primary);font-size:var(--font-size-base);letter-spacing:.04em}
+    .word-definition{max-width:620px;margin-top:10px;color:var(--color-text-secondary);line-height:1.8}
+    .speak-button{width:52px;height:52px;display:grid;place-items:center;flex-shrink:0;color:var(--color-primary);background:#fff;border:1px solid rgba(107,155,208,.28);border-radius:16px;cursor:pointer;font-size:18px}
+    .speak-button:hover{color:#fff;background:var(--color-primary)}
+    .context-bar{display:none;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;padding:13px 16px;background:var(--color-primary-light);border-radius:var(--radius-md);font-size:var(--font-size-xs)}
+    .context-bar.is-visible{display:flex}.context-bar span{color:var(--color-text-secondary)}
+    .detail-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:18px;margin-top:18px}
+    .detail-card{padding:24px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg)}
+    .detail-card h2{font-size:var(--font-size-base)}
+    .detail-card__hint{margin-top:4px;color:var(--color-text-tertiary);font-size:var(--font-size-xs)}
+    .meaning-list,.example-list{display:grid;gap:10px;margin-top:16px}
+    .meaning-item,.example-item{position:relative;padding:13px 15px 13px 42px;color:var(--color-text-secondary);background:var(--color-background);border-radius:var(--radius-md);font-size:var(--font-size-sm);line-height:1.75}
+    .meaning-item span,.example-item span{position:absolute;left:13px;top:13px;width:21px;height:21px;display:grid;place-items:center;color:var(--color-primary);background:#fff;border-radius:7px;font-size:10px;font-weight:600}
+    .related-words{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+    .related-words span{padding:7px 11px;color:var(--color-primary);background:var(--color-primary-light);border-radius:var(--radius-full);font-size:var(--font-size-xs)}
+    .learning-tip{margin-top:16px;padding:15px;color:var(--color-text-secondary);background:var(--color-accent-light);border-radius:var(--radius-md);font-size:var(--font-size-sm);line-height:1.75}
+    .source-note{margin-top:14px;color:var(--color-text-tertiary);font-size:11px;line-height:1.7}
+    @media(max-width:760px){.dictionary-main{padding:18px 14px}.word-hero{align-items:flex-start;padding:22px;flex-direction:column}.word-hero__main{align-items:flex-start;flex-direction:column}.word-glyph{min-width:76px;height:76px;font-size:36px}.detail-grid{grid-template-columns:1fr}.context-bar{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <nav class="topnav" aria-label="主导航"><a class="topnav__brand" href="index.html"><div class="topnav__logo">犀</div><span class="topnav__name">灵小犀</span></a><div class="topnav__nav"><a class="topnav__link" href="index.html">工作台</a><a class="topnav__link" href="case-database.html">个案数据库</a><a class="topnav__link is-active" href="course-database.html">课程中心</a></div><div class="topnav__user"><div class="avatar">U</div><span>管理员</span></div></nav>
+  <main class="dictionary-main"><div class="dictionary-shell">
+    <a class="back-link" id="backLink" href="course-database.html">← 返回课程</a>
+    <section class="word-hero" aria-labelledby="wordTitle"><div class="word-hero__main"><div class="word-glyph" id="wordGlyph">词</div><div><span class="word-kicker">转写文本 · 字词解释</span><h1 class="word-title" id="wordTitle">字词</h1><span class="word-pinyin" id="wordPinyin"></span><p class="word-definition" id="wordDefinition"></p></div></div><button class="speak-button" id="speakButton" type="button" aria-label="朗读当前字词">▶</button></section>
+    <div class="context-bar" id="contextBar"><span>来自课程：<strong id="contextCourse"></strong></span><a id="returnCourseLink" href="course-database.html">返回原课程</a></div>
+    <div class="detail-grid"><div>
+      <section class="detail-card"><h2>详细释义</h2><p class="detail-card__hint">结合儿童当前课程语境理解字词</p><div class="meaning-list" id="meaningList"></div></section>
+      <section class="detail-card" style="margin-top:18px"><h2>例句</h2><p class="detail-card__hint">在完整句子中学习字词用法</p><div class="example-list" id="exampleList"></div></section>
+    </div><aside>
+      <section class="detail-card"><h2>相关组词</h2><div class="related-words" id="relatedWords"></div></section>
+      <section class="detail-card" style="margin-top:18px"><h2>学习提示</h2><p class="learning-tip" id="learningTip"></p><p class="source-note">当前为交互原型词条。正式释义、拼音和语音数据源尚待确认，已记录在项目根目录的 tocheck.md 中。</p></section>
+    </aside></div>
+  </div></main>
+  <script src="dictionary-data.js"></script>
+  <script>
+    (function(){
+      var params=new URLSearchParams(location.search),word=params.get('word')||'自行车',source=params.get('source')||'course',courseId=params.get('course')||'',courseName=params.get('courseName')||'',caseId=params.get('case')||'',caseName=params.get('caseName')||'',dictionary=window.LINGXI_DICTIONARY||{};
+      function fallback(value){return{pinyin:'拼音待词典数据补充',definition:'“'+value+'”的正式释义尚待接入电子词典数据。',words:['词典数据待补充'],examples:['请结合原句理解“'+value+'”的含义。'],detail:['该字词当前使用原型占位内容，正式释义、词性和用法需由确认后的电子词典数据源提供。'],tip:'返回原句，观察这个字词前后的内容。'}}
+      function renderItems(containerId,items,className){var container=document.getElementById(containerId);container.textContent='';(items||[]).forEach(function(item,index){var row=document.createElement('div');row.className=className;var number=document.createElement('span');number.textContent=String(index+1).padStart(2,'0');row.appendChild(number);row.appendChild(document.createTextNode(item));container.appendChild(row)})}
+      var entry=dictionary[word]||fallback(word);document.title=word+' - 字词详细解释 - 灵小犀';document.getElementById('wordGlyph').textContent=word;document.getElementById('wordTitle').textContent=word;document.getElementById('wordPinyin').textContent=entry.pinyin;document.getElementById('wordDefinition').textContent=entry.definition;document.getElementById('learningTip').textContent=entry.tip||'结合原句理解并尝试用这个字词说一句话。';renderItems('meaningList',entry.detail||[entry.definition],'meaning-item');renderItems('exampleList',entry.examples||[],'example-item');var related=document.getElementById('relatedWords');(entry.words||[]).forEach(function(item){var chip=document.createElement('span');chip.textContent=item;related.appendChild(chip)});
+      function speak(){if('speechSynthesis'in window){speechSynthesis.cancel();var utterance=new SpeechSynthesisUtterance(word);utterance.lang='zh-CN';utterance.rate=.85;speechSynthesis.speak(utterance)}}document.getElementById('speakButton').addEventListener('click',speak);
+      if(source==='assessment'){var assessmentQuery=new URLSearchParams();if(caseId)assessmentQuery.set('case',caseId);if(caseName)assessmentQuery.set('caseName',caseName);var assessmentUrl='narrative-assessment.html'+(assessmentQuery.toString()?'?'+assessmentQuery.toString():'');document.getElementById('contextBar').classList.add('is-visible');document.getElementById('contextCourse').textContent='叙事评估 · 小明的新自行车';document.getElementById('returnCourseLink').textContent='返回叙事评估';document.getElementById('returnCourseLink').href=assessmentUrl;document.getElementById('backLink').textContent='← 返回叙事评估';document.getElementById('backLink').href=assessmentUrl}else if(courseId||courseName){var courseQuery=new URLSearchParams();if(courseId)courseQuery.set('id',courseId);if(courseName)courseQuery.set('name',courseName);if(caseId)courseQuery.set('case',caseId);if(caseName)courseQuery.set('caseName',caseName);var courseUrl='course-detail.html?'+courseQuery.toString();document.getElementById('contextBar').classList.add('is-visible');document.getElementById('contextCourse').textContent=courseName||'当前课程';document.getElementById('returnCourseLink').href=courseUrl;document.getElementById('backLink').href=courseUrl}
+      document.getElementById('backLink').addEventListener('click',function(event){if(history.length>1){event.preventDefault();history.back()}});
+    })();
+  </script>
+</body>
+</html>
